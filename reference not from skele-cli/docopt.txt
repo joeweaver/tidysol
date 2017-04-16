@@ -1,0 +1,19 @@
+TidySOL, a CLI for tidying up exported COMSOL data.
+
+Usage:
+  tidysol.py times <name>
+  tidysol.py vars <name>
+  tidysol.py headers <name>
+  tidysol.py tidy <name> [--time=<time> ... ] [--col=<variable> ...] -o=<outfile>
+  tidysol.py -h | --help
+  tidysol.py --version
+
+Commands:
+
+
+Options:
+  -h --help     Show this screen.
+  -d --describe Include the variable's description.
+  --time=<time> ... Create a tidy csv for time steps given
+
+
