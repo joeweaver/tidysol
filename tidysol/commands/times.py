@@ -24,7 +24,8 @@ class Times(Base):
                             varsLine=linecount
                         else:
                             raise Exception("Found more than one line naming variables: "+str(varsLine) + " & " + str(linecount))
-                    
+            if varsLine != 1:
+                raise Exception("Could not find a line defining variables")                    
                 
         except error_to_catch:
               print("Could not find file: "+self.options["<name>"])
