@@ -2,7 +2,7 @@
 % Version:            COMSOL 4.3.1.110
 % Date:               Apr 5 2017, 16:28
 % Dimension:          3
-% Nodes:              22164
+% Nodes:              6
 % Expressions:        19
 % Description:        radius of rotating wall, non-rotating wall, rotations per min, Cell Reynolds number, Pressure, Shear rate, Velocity field, x component, Velocity field, y component, Velocity field, z component, Velocity magnitude, Volume force, x component, Volume force, y component, Volume force, z component, Vorticity field, x component, Vorticity field, y component, Vorticity field, z component, Vorticity magnitude, Volume scale factor, 
 % Length unit:        m
