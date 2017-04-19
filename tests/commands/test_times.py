@@ -3,7 +3,6 @@
 
 from subprocess import PIPE, Popen as popen
 from unittest import TestCase
-import pytest
 
 class TestTimes(TestCase):
 #==============================================================================

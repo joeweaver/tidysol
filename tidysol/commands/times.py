@@ -1,8 +1,5 @@
 """The times command."""
 
-
-from json import dumps
-
 from .base import Base
 import re
    
