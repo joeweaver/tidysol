@@ -33,12 +33,27 @@ class TestTimes(TestCase):
         output = popen(['tidysol', 'times', 'tests\\commands\\data\\bad-two-varsline.txt'], stdout=PIPE).communicate()[0].decode("utf-8")
         self.assertTrue('Found more than one line naming variables: 9 & 10' in output)        
 
-    #potential parser issues (file does not appear to be COMSOL file or potential regex bugs
     def test_error_no_vars_lines(self):
         output = popen(['tidysol', 'times', 'tests\\commands\\data\\bad-no-varsline.txt'], stdout=PIPE).communicate()[0].decode("utf-8")
         assert('Could not find a line defining variables' in output)  
 
-    #probably based on failure to run Regex
+    #these are a bit strict, but probably a good idea. Testing the file
+    #for internal consistency
+
+    #the number of variables found '% Expressions'' should be the same as
+    #'% Dimension :' + the number of matches on the varsline
+    def test_error_wrong_number_of_vars(self):
+        output = popen(['tidysol', 'times', 'tests\\commands\\data\\bad-wrong-num-vars.txt'], stdout=PIPE).communicate()[0].decode("utf-8")
+        assert('Expected 21 variables (3 dimensions and 18 epressions) but found 22 (3 dimensions and 19 expressions)' in output)  
+
+    #sub case of test_error_wrong_number_of_vars if %Dimension is not given
+
+    #sub case of test_error_wrong_number_of_vars if %Expressions is not given
+
+    #should only have one '%<FOO> :' line in header per <FOO>
+    #this exists to make sure that we are reading the correct 'Expressions'
+    #for example, when checking internal file consistency
+
     #TODO double check if the header always includes the metadata
     #can also fail on good regex but wrong number of nodes, dimensions, or expressions
     #also check if number of descriptions is the same as num expressions
