@@ -58,9 +58,15 @@ class TestTimes(TestCase):
     
     #the number of lines which do not begin with % should be the same as the
     #% nodes value in the metadata
+    def test_error_wrong_num_nodes(self):
+        output = popen(['tidysol', 'times', 'tests\\commands\\data\\bad-wrong-num-nodes.txt'], stdout=PIPE).communicate()[0].decode("utf-8")
+        assert('Expected 5 nodes but read 6' in output)    
     
     #sub case of test_error_wrong_number_of_nodes if % nodes is not given
-    
+    def test_error_no_nodes_meta(self):
+        output = popen(['tidysol', 'times', 'tests\\commands\\data\\bad-no-nodesmeta.txt'], stdout=PIPE).communicate()[0].decode("utf-8")
+        assert('Could not find a % Nodes line' in output)
+        
     #The number of descriptions is the same as number listed in % Expressions
     #descriptions are allowed to be a blank string    
     

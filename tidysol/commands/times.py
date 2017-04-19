@@ -18,7 +18,9 @@ class Times(Base):
             foundVars = None
             numExpressions=-1
             numDimensions=-1
+            numNodesMeta=-1
             dimVars = None
+            nodeCount=0
             for line in open(self.options["<name>"],"r"):
                 linecount=linecount + 1
                 matchHead= re.search('^%',line)
@@ -34,6 +36,8 @@ class Times(Base):
                             foundAt = re.search(varReg,line)
                             possibleDims=line[1:foundAt.start()-1]
                             dimVars = possibleDims.split()
+                else:
+                    nodeCount=nodeCount+1
                 #TODO this will become a generic match headers at some point
                 matchExpressionCount = re.search('^% Expressions:\s+(\d+)',line)
                 if matchExpressionCount:
@@ -41,13 +45,22 @@ class Times(Base):
                 matchDimensions=re.search('^% Dimension:\s+(\d+)',line)
                 if matchDimensions:                
                     numDimensions = matchDimensions.group(1)
+                matchNodesMeta=re.search('^% Nodes:\s+(\d+)',line)
+                if matchNodesMeta:                
+                    numNodesMeta = matchNodesMeta.group(1)
+
+            if(numExpressions == -1):
+                raise Exception("Could not find an % Expressions line")
+            if(numDimensions == -1):
+                raise Exception("Could not find a % Dimensions line")
+            if(numNodesMeta == -1):
+                raise Exception("Could not find a % Nodes line")            
+            
+            if(int(numNodesMeta) != nodeCount):
+                raise Exception('Expected {0} nodes but read {1}'.format(numNodesMeta,nodeCount))
 
             #examine the variable names found                
             if foundVars:
-                if(numExpressions == -1):
-                    raise Exception("Could not find an % Expressions line")
-                if(numDimensions == -1):
-                    raise Exception("Could not find a % Dimensions line")
                 expected=int(numExpressions)+int(numDimensions)
                 if len(foundVars)+len(dimVars) != numExpressions+numDimensions:
                     raise Exception('Expected {0} variables ({1} dimensions and {2} epressions) but found {3} ({4} dimensions and {5} expressions)'.format(expected,numDimensions,numExpressions,len(foundVars)+len(dimVars),len(dimVars),len(foundVars)))               
