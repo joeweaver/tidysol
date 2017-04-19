@@ -44,6 +44,10 @@ class Times(Base):
 
             #examine the variable names found                
             if foundVars:
+                if(numExpressions == -1):
+                    raise Exception("Could not find an % Expressions line")
+                if(numDimensions == -1):
+                    raise Exception("Could not find a % Dimensions line")
                 expected=int(numExpressions)+int(numDimensions)
                 if len(foundVars)+len(dimVars) != numExpressions+numDimensions:
                     raise Exception('Expected {0} variables ({1} dimensions and {2} epressions) but found {3} ({4} dimensions and {5} expressions)'.format(expected,numDimensions,numExpressions,len(foundVars)+len(dimVars),len(dimVars),len(foundVars)))               

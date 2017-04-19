@@ -45,17 +45,33 @@ class TestTimes(TestCase):
         output = popen(['tidysol', 'times', 'tests\\commands\\data\\bad-wrong-num-vars.txt'], stdout=PIPE).communicate()[0].decode("utf-8")
         assert('Expected 21 variables (3 dimensions and 18 epressions) but found 22 (3 dimensions and 19 expressions)' in output)  
 
-    #sub case of test_error_wrong_number_of_vars if %Dimension is not given
-
     #sub case of test_error_wrong_number_of_vars if %Expressions is not given
+    def test_error_no_expressions_meta(self):
+        output = popen(['tidysol', 'times', 'tests\\commands\\data\\bad-no-expressionsmeta.txt'], stdout=PIPE).communicate()[0].decode("utf-8")
+        assert('Could not find an % Expressions line' in output)
+        
+    #sub case of test_error_wrong_number_of_vars if %Dimension is not given
+    def test_error_no_dimensions_meta(self):
+        output = popen(['tidysol', 'times', 'tests\\commands\\data\\bad-no-dimensionsmeta.txt'], stdout=PIPE).communicate()[0].decode("utf-8")
+        assert('Could not find a % Dimensions line' in output)
 
+    
+    #the number of lines which do not begin with % should be the same as the
+    #% nodes value in the metadata
+    
+    #sub case of test_error_wrong_number_of_nodes if % nodes is not given
+    
+    #The number of descriptions is the same as number listed in % Expressions
+    #descriptions are allowed to be a blank string    
+    
+    #TODO    
     #should only have one '%<FOO> :' line in header per <FOO>
     #this exists to make sure that we are reading the correct 'Expressions'
     #for example, when checking internal file consistency
 
     #TODO double check if the header always includes the metadata
-    #can also fail on good regex but wrong number of nodes, dimensions, or expressions
-    #also check if number of descriptions is the same as num expressions
+    
+
 """  def test_error_file_is_not_COMSOL_export(self):
         self.assertTrue(False)
 
