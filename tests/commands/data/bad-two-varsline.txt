@@ -1,4 +1,4 @@
-% Model:              3d sliding wall - oCTB - Hyun 50.mph
+	% Model:              3d sliding wall - oCTB - Hyun 50.mph
 % Version:            COMSOL 4.3.1.110
 % Date:               Apr 5 2017, 16:28
 % Dimension:          3

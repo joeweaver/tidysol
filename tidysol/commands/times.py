@@ -2,7 +2,8 @@
 
 from .base import Base
 import re
-   
+import csv 
+
 class Times(Base):
     """List the timesteps for which data are recorded"""
 
@@ -10,17 +11,20 @@ class Times(Base):
     def run(self):
         error_to_catch = getattr(__builtins__,'FileNotFoundError', IOError)
         try:
+            NOT_MATCHED=-1
             #TODO this is an ad-hoc parse built up from unit tests could refactor it to definitely its own class probably make it as a better parser too.
         
             #find one and only one line defining variable names
             varsLine=0
             linecount = 0
             foundVars = None
-            numExpressions=-1
-            numDimensions=-1
-            numNodesMeta=-1
+            numExpressions=NOT_MATCHED
+            numDimensions=NOT_MATCHED
+            numNodesMeta=NOT_MATCHED
             dimVars = None
             nodeCount=0
+            descriptions=None
+            numDesc=NOT_MATCHED
             for line in open(self.options["<name>"],"r"):
                 linecount=linecount + 1
                 matchHead= re.search('^%',line)
@@ -48,22 +52,36 @@ class Times(Base):
                 matchNodesMeta=re.search('^% Nodes:\s+(\d+)',line)
                 if matchNodesMeta:                
                     numNodesMeta = matchNodesMeta.group(1)
-
-            if(numExpressions == -1):
+                matchDescriptions=re.search('^% Description:\s+(.+)',line)
+                if matchDescriptions:
+                    rawDesc=matchDescriptions.group(1)
+                    #description field includes a spurious final ,\s*
+                    trimmedDesc = re.sub('(,[\s*]*)$','',rawDesc)
+                    #have to quote things like 'Velocity, z component'
+                    quotedDesc=re.sub('([^,]*,\s+\S+\s+component[^,]*)', lambda x: "\"{0}\"".format(x.group(1)),trimmedDesc)
+                    #letting the csv package deal with splitting by only unenclosed commas
+                    descriptions = csv.reader([quotedDesc], delimiter=',') 
+                    for row in descriptions: 
+                        numDesc=len(row)
+            if(numExpressions == NOT_MATCHED):
                 raise Exception("Could not find an % Expressions line")
-            if(numDimensions == -1):
+            if(numDimensions == NOT_MATCHED):
                 raise Exception("Could not find a % Dimensions line")
-            if(numNodesMeta == -1):
-                raise Exception("Could not find a % Nodes line")            
+            if(numNodesMeta == NOT_MATCHED):
+                raise Exception("Could not find a % Nodes line")  
+            if(numDesc==NOT_MATCHED):
+                raise Exception("Could not find a % Description line")
             
             if(int(numNodesMeta) != nodeCount):
                 raise Exception('Expected {0} nodes but read {1}'.format(numNodesMeta,nodeCount))
 
+            if(int(numExpressions)!=numDesc):
+                raise Exception('Expected {0} descriptions of variables but read {1}'.format(numExpressions,numDesc))
             #examine the variable names found                
             if foundVars:
                 expected=int(numExpressions)+int(numDimensions)
-                if len(foundVars)+len(dimVars) != numExpressions+numDimensions:
-                    raise Exception('Expected {0} variables ({1} dimensions and {2} epressions) but found {3} ({4} dimensions and {5} expressions)'.format(expected,numDimensions,numExpressions,len(foundVars)+len(dimVars),len(dimVars),len(foundVars)))               
+                if len(foundVars)+len(dimVars) != expected:
+                    raise Exception('Expected {0} variables ({1} dimensions and {2} expressions) but found {3} ({4} dimensions and {5} expressions)'.format(expected,numDimensions,numExpressions,len(foundVars)+len(dimVars),len(dimVars),len(foundVars)))               
             else:
                 raise Exception("Could not find a line defining variables") 
 

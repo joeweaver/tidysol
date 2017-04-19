@@ -43,7 +43,7 @@ class TestTimes(TestCase):
     #'% Dimension :' + the number of matches on the varsline
     def test_error_wrong_number_of_vars(self):
         output = popen(['tidysol', 'times', 'tests\\commands\\data\\bad-wrong-num-vars.txt'], stdout=PIPE).communicate()[0].decode("utf-8")
-        assert('Expected 21 variables (3 dimensions and 18 epressions) but found 22 (3 dimensions and 19 expressions)' in output)  
+        assert('Expected 21 variables (3 dimensions and 18 expressions) but found 22 (3 dimensions and 19 expressions)' in output)  
 
     #sub case of test_error_wrong_number_of_vars if %Expressions is not given
     def test_error_no_expressions_meta(self):
@@ -55,7 +55,8 @@ class TestTimes(TestCase):
         output = popen(['tidysol', 'times', 'tests\\commands\\data\\bad-no-dimensionsmeta.txt'], stdout=PIPE).communicate()[0].decode("utf-8")
         assert('Could not find a % Dimensions line' in output)
 
-    
+    #TODO handle vars counting when more than one time step is recorded
+
     #the number of lines which do not begin with % should be the same as the
     #% nodes value in the metadata
     def test_error_wrong_num_nodes(self):
@@ -69,7 +70,17 @@ class TestTimes(TestCase):
         
     #The number of descriptions is the same as number listed in % Expressions
     #descriptions are allowed to be a blank string    
+    #unfortunately, descriptions can also contain unescaped commas - such as: Velocity field, z component
+    def test_error_wrong_num_descriptions(self):
+        output = popen(['tidysol', 'times', 'tests\\commands\\data\\bad-wrong-num-descriptions.txt'], stdout=PIPE).communicate()[0].decode("utf-8")
+        assert('Expected 18 descriptions of variables but read 19' in output)
     
+    #sub case of test_error_wrong_num_descriptions if % descriptions not given    
+    def test_error_no_description_meta(self):
+        output = popen(['tidysol', 'times', 'tests\\commands\\data\\bad-no-descriptionsmeta.txt'], stdout=PIPE).communicate()[0].decode("utf-8")
+        assert('Could not find a % Description line' in output)
+    
+        
     #TODO    
     #should only have one '%<FOO> :' line in header per <FOO>
     #this exists to make sure that we are reading the correct 'Expressions'
