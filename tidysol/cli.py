@@ -40,7 +40,7 @@ from inspect import getmembers, isclass
 from docopt import docopt
 
 from . import __version__ as VERSION
-
+import re
 
 def main():
     """Main CLI entrypoint."""
@@ -53,6 +53,9 @@ def main():
         if hasattr(tidysol.commands, k) and v:
             module = getattr(tidysol.commands, k)
             tidysol.commands = getmembers(module, isclass)
-            command = [command[1] for command in tidysol.commands if command[0] != 'Base'][0]
-            command = command(options)
-            command.run()
+            for command in tidysol.commands:
+                if command[0] != 'Base':
+                    if re.search('^\<class \'tidysol\.commands\.',str(command[1])): 
+                        command=command[1]
+                        command=command(options)
+                        command.run()
