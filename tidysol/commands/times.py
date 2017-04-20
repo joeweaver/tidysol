@@ -55,10 +55,8 @@ class Times(Base):
                 matchDescriptions=re.search('^% Description:\s+(.+)',line)
                 if matchDescriptions:
                     rawDesc=matchDescriptions.group(1)
-                    #description field includes a spurious final ,\s*
-                    trimmedDesc = re.sub('(,[\s*]*)$','',rawDesc)
                     #have to quote things like 'Velocity, z component'
-                    quotedDesc=re.sub('([^,]*,\s+\S+\s+component[^,]*)', lambda x: "\"{0}\"".format(x.group(1)),trimmedDesc)
+                    quotedDesc=re.sub('([^,]*,\s+\S+\s+component[^,]*)', lambda x: "\"{0}\"".format(x.group(1)),rawDesc)
                     #letting the csv package deal with splitting by only unenclosed commas
                     descriptions = csv.reader([quotedDesc], delimiter=',') 
                     for row in descriptions: 
@@ -80,7 +78,13 @@ class Times(Base):
             #examine the variable names found                
             if foundVars:
                 expected=int(numExpressions)+int(numDimensions)
-                if len(foundVars)+len(dimVars) != expected:
+                if len(foundVars)+len(dimVars) == expected:
+                    #if performance is an issue, we could get more clever about this                    
+                    timesteps=set()
+                    for (varn,units,timestep) in foundVars:
+                        timesteps.add(float(timestep))
+                    print(", ".join(str(step) for step in timesteps))
+                else:
                     raise Exception('Expected {0} variables ({1} dimensions and {2} expressions) but found {3} ({4} dimensions and {5} expressions)'.format(expected,numDimensions,numExpressions,len(foundVars)+len(dimVars),len(dimVars),len(foundVars)))               
             else:
                 raise Exception("Could not find a line defining variables") 

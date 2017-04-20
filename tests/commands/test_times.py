@@ -73,13 +73,18 @@ class TestTimes(TestCase):
     #unfortunately, descriptions can also contain unescaped commas - such as: Velocity field, z component
     def test_error_wrong_num_descriptions(self):
         output = popen(['tidysol', 'times', 'tests\\commands\\data\\bad-wrong-num-descriptions.txt'], stdout=PIPE).communicate()[0].decode("utf-8")
-        assert('Expected 18 descriptions of variables but read 19' in output)
+        assert('Expected 18 descriptions of variables but read 20' in output)
     
     #sub case of test_error_wrong_num_descriptions if % descriptions not given    
     def test_error_no_description_meta(self):
         output = popen(['tidysol', 'times', 'tests\\commands\\data\\bad-no-descriptionsmeta.txt'], stdout=PIPE).communicate()[0].decode("utf-8")
         assert('Could not find a % Description line' in output)
     
+    
+    #try a simple file with one tim step recorded   
+    def test_sing_timestep(self):
+        output = popen(['tidysol', 'times', 'tests\\commands\\data\\good-single-timestep.txt'], stdout=PIPE).communicate()[0].decode("utf-8")
+        assert('1.1' in output)
         
     #TODO    
     #should only have one '%<FOO> :' line in header per <FOO>
