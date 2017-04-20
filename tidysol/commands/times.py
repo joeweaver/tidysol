@@ -73,23 +73,24 @@ class Times(Base):
             if(int(numNodesMeta) != nodeCount):
                 raise Exception('Expected {0} nodes but read {1}'.format(numNodesMeta,nodeCount))
 
-            if(int(numExpressions)!=numDesc):
-                raise Exception('Expected {0} descriptions of variables but read {1}'.format(numExpressions,numDesc))
-            #examine the variable names found                
+            #examine the variable names found      
+            timesteps=set()           
             if foundVars:
                 expected=int(numExpressions)+int(numDimensions)
                 if len(foundVars)+len(dimVars) == expected:
                     #if performance is an issue, we could get more clever about this                    
-                    timesteps=set()
                     for (varn,units,timestep) in foundVars:
                         timesteps.add(float(timestep))
-                    print(", ".join(str(step) for step in timesteps))
                 else:
                     raise Exception('Expected {0} variables ({1} dimensions and {2} expressions) but found {3} ({4} dimensions and {5} expressions)'.format(expected,numDimensions,numExpressions,len(foundVars)+len(dimVars),len(dimVars),len(foundVars)))               
             else:
                 raise Exception("Could not find a line defining variables") 
-
-                
+            
+            expectedDesc=int(numExpressions)/len(timesteps)
+            if(expectedDesc!=numDesc):
+                raise Exception('Expected {0} descriptions of variables but read {1}'.format(int(expectedDesc),numDesc))
+            print(", ".join(str(step) for step in timesteps))
+        
         except error_to_catch:
               print("Could not find file: "+self.options["<name>"])
         except Exception as e: #TODO may want to spend time making a custom exception class work
