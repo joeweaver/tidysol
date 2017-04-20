@@ -1,0 +1,2 @@
+class TidysolException(BaseException):
+    pass

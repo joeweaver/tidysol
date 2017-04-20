@@ -1,6 +1,9 @@
 """The times command."""
 
 from .base import Base
+from .. import ComsolExportFile
+from ..Exceptions import TidysolException
+    
 import re
 import csv 
 
@@ -9,7 +12,6 @@ class Times(Base):
 
 
     def run(self):
-        error_to_catch = getattr(__builtins__,'FileNotFoundError', IOError)
         try:
             NOT_MATCHED=-1
             #TODO this is an ad-hoc parse built up from unit tests could refactor it to definitely its own class probably make it as a better parser too.
@@ -25,6 +27,7 @@ class Times(Base):
             nodeCount=0
             descriptions=None
             numDesc=NOT_MATCHED
+            c=ComsolExportFile(self.options["<name>"])
             for line in open(self.options["<name>"],"r"):
                 linecount=linecount + 1
                 matchHead= re.search('^%',line)
@@ -91,7 +94,7 @@ class Times(Base):
                 raise Exception('Expected {0} descriptions of variables but read {1}'.format(int(expectedDesc),numDesc))
             print(", ".join(str(step) for step in timesteps))
         
-        except error_to_catch:
-              print("Could not find file: "+self.options["<name>"])
         except Exception as e: #TODO may want to spend time making a custom exception class work
+            print(e)
+        except TidysolException as e:
             print(e)

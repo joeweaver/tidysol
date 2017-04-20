@@ -5,6 +5,9 @@ from subprocess import PIPE, Popen as popen
 from unittest import TestCase
 
 class TestTimes(TestCase):
+    
+    #For file format error handling I could probably just assert that this command calls the to be written
+    #ComsolExportFile class
 #==============================================================================
 #     If the file does not exist or is is not given    
 #==============================================================================
@@ -23,8 +26,8 @@ class TestTimes(TestCase):
 
     def test_error_file_does_not_exist(self):
         #TODO can probably extract a function on the popen
-        output = popen(['tidysol', 'times', 'dne.txt'], stdout=PIPE).communicate()[0].decode("utf-8")
-        assert('Could not find file: dne.txt' in output)
+        output = popen(['tidysol', 'times', 'tests\\commands\\data\\dne.txt'], stdout=PIPE).communicate()[0].decode("utf-8")
+        assert('Could not find file: tests\\commands\\data\\dne.txt' in output)
     ###########################################################################    
     #potential parser issues (file does not appear to be COMSOL file or potential regex bugs
     ###########################################################################
@@ -98,27 +101,3 @@ class TestTimes(TestCase):
 
     #TODO double check if the header always includes the metadata
     
-
-"""  def test_error_file_is_not_COMSOL_export(self):
-        self.assertTrue(False)
-
-    #fails if #cols not what predicted by timestep 
-    def test_error_timestep_vs_cols_sanity_test(self):
-        self.assertTrue(False)
-
-    #try for two files with single different timestep values
-    def test_identifies_single_timestep(self):
-        self.assertTrue(False)
-
-    #try for two files, each containing a different number of timesteps with different values
-    def test_identifies_single_timestep(self):
-        self.assertTrue(False)    
-"""
-"""    def test_returns_multiple_lines(self):
-        output = popen(['tidysol', 'hello'], stdout=PIPE).communicate()[0].decode("utf-8")
-        lines = output.split('\n')
-        self.assertTrue(len(lines) != 1)
-
-    def test_returns_hello_world(self):
-        output = popen(['tidysol', 'hello'], stdout=PIPE).communicate()[0]
-        self.assertTrue(b'Hello, world!' in output)"""
