@@ -1,14 +1,21 @@
-"""The hello command."""
-
-
-from json import dumps
+"""The vars command."""
 
 from .base import Base
+from .. import ComsolExportFile
+from ..Exceptions import TidysolException
 
 
 class Vars(Base):
-    """Say hello, world!"""
-
+    """List the variables (with descriptions, and including metadata) for which data are recorded"""
+    
     def run(self):
-        print('Hello, world!')
-        print('You supplied the following options:', dumps(self.options, indent=2, sort_keys=True))
+        try:
+            c=ComsolExportFile(self.options["<name>"])    
+            print(", ".join(str(step) for step in c.timesteps))
+        
+        #not much to do with unexpected exceptions other than print them out
+        except Exception as e: 
+            print(e)
+            
+        except TidysolException as e:
+            print(e)

@@ -5,29 +5,7 @@ from subprocess import PIPE, Popen as popen
 from unittest import TestCase
 
 class TestTimes(TestCase):
-    
-    #For file format error handling I could probably just assert that this command calls the to be written
-    #ComsolExportFile class
-#==============================================================================
-#     If the file does not exist or is is not given    
-#==============================================================================
-    #TODO check STDERR instead.
-    #TODO exit with error code?
-    
-    #right now docopt coopts this and shows usage. I'd like to inject a line where it says it's failing due to the lack of a filename
-    #for now, just showing usage is enough
-    def test_error_no_filename(self):
-        proc=popen(['tidysol', 'times'], stdout=PIPE, stderr=PIPE)
-        output,err =proc.communicate()
-        err=err.decode("utf-8")
-        lines = err.split('\n')
-        self.assertTrue(len(lines) != 1)
-        self.assertTrue('Usage:' in lines[0])
 
-    def test_error_file_does_not_exist(self):
-        #TODO can probably extract a function on the popen
-        output = popen(['tidysol', 'times', 'tests\\commands\\data\\dne.txt'], stdout=PIPE).communicate()[0].decode("utf-8")
-        assert('Could not find file: tests\\commands\\data\\dne.txt' == output.rstrip())
     ###########################################################################    
     #potential parser issues (file does not appear to be COMSOL file or potential regex bugs
     ###########################################################################

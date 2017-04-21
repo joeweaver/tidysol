@@ -1,20 +1,10 @@
-"""Tests for our `tidysol times <name>` subcommand."""
+"""Tests for our `tidysol vars <name>` subcommand."""
 
 
 from subprocess import PIPE, Popen as popen
 from unittest import TestCase
 
 class TestVars(TestCase):
-    
-    #right now docopt coopts this and shows usage. I'd like to inject a line where it says it's failing due to the lack of a filename
-    #for now, just showing usage is enough
-    def test_error_no_filename(self):
-        proc=popen(['tidysol', 'vars'], stdout=PIPE, stderr=PIPE)
-        output,err =proc.communicate()
-        err=err.decode("utf-8")
-        lines = err.split('\n')
-        self.assertTrue(len(lines) != 1)
-        self.assertTrue('Usage:' in lines[0])
         
     def test_true(self):
         assert(True)
