@@ -3,6 +3,7 @@
 from tidysol.Exceptions import TidysolException
 import re
 import csv
+import collections
 
 class ComsolExportFile(object):
     """An exported comsol file reader."""
@@ -10,6 +11,7 @@ class ComsolExportFile(object):
     def __init__(self, filename):
         self.filename=filename
         self.timesteps=set() 
+        self.columnVars=collections.OrderedDict()
         
         error_to_catch = getattr(__builtins__,'FileNotFoundError', IOError)
         #TODO this is an ad-hoc parse built up from unit tests and miht benefit from refactoring
@@ -24,6 +26,7 @@ class ComsolExportFile(object):
             numNodesMeta=NOT_MATCHED
             numDesc=NOT_MATCHED
             nodeCount=0
+            varDescs=[]
             for line in open(self.filename,"r"):
                 linecount=linecount + 1
                 matchHead= re.search('^%',line)
@@ -59,7 +62,8 @@ class ComsolExportFile(object):
                     descriptions = csv.reader([quotedDesc], delimiter=',') 
                     for row in descriptions: 
                         numDesc=len(row)
-                        
+                        for r in row:
+                            varDescs.append(re.sub('\s*,\s*',' - ',r.strip()))    
             if(numExpressions == NOT_MATCHED):
                 raise TidysolException("Could not find an % Expressions line")
             if(numDimensions == NOT_MATCHED):
@@ -72,13 +76,23 @@ class ComsolExportFile(object):
             if(int(numNodesMeta) != nodeCount):
                 raise TidysolException('Expected {0} nodes but read {1}'.format(numNodesMeta,nodeCount))
              
-
+            
             if foundVars:
                 expected=int(numExpressions)+int(numDimensions)
                 if len(foundVars)+len(dimVars) == expected:
+                    varnum=0
                     #if performance is an issue, we could get more clever about this                    
                     for (varn,units,timestep) in foundVars:
                        self.timesteps.add(float(timestep))
+
+                       #slightly hacky - there is a varn for each repeated timestep. Once we get to the end of the descriptions, we're looping around, so exit the iteration
+                       #there's a few hole in it, but the internal consistency checks should catch them first (famous last words)                    
+                       if varnum<(numDesc-1):
+                           if(varnum<int(numDimensions)):
+                              self.columnVars[dimVars[varnum]]=" "
+                           else:
+                              self.columnVars[varn]="{0}".format(varDescs[varnum])     
+                       varnum=varnum+1          
                 else:
                     raise TidysolException('Expected {0} variables ({1} dimensions and {2} expressions) but found {3} ({4} dimensions and {5} expressions)'.format(expected,numDimensions,numExpressions,len(foundVars)+len(dimVars),len(dimVars),len(foundVars)))               
             else:
