@@ -9,7 +9,7 @@ from unittest import TestCase
 
 class TestSharedErrors(TestCase):
     def setUp(self):
-        self.commands=['times','vars','meta']
+        self.commands=['times','vars','meta','tidy']
 
 #==============================================================================
 #     If the file does not exist or is is not given    
