@@ -11,9 +11,10 @@ class TestMeta(TestCase):
     def test_single_timestep_with_descriptions(self):
         time=12.3        
         expected = "Could not find data for time {0}".format(time)
-        output = popen(['tidysol', 'tidy', 'tests\\commands\\data\\good-single-timestep.txt','--times={0}'.format(time)], stdout=PIPE).communicate()[0].decode("utf-8")
+        output = popen(['tidysol', 'tidy', 'tests\\commands\\data\\good-single-timestep.txt','--times={0}'.format(time)], stdout=PIPE,bufsize=16384).communicate()[0].decode("utf-8")
         assert(expected == output.rstrip())        
         
+    #time is not correct format LAST or [\d|\.]+
     #base case for single time step, default time,defualt vars, output to terminal
         
     #two time steps default time,defualt vars, output to terminal

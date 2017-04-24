@@ -28,7 +28,7 @@ class RunTests(Command):
 
     def run(self):
         """Run all tests!"""
-        errno = call(['pytest', '--cov=tidysol', '--cov-report=term-missing'])
+        errno = call(['pytest', '--cov=tidysol', '--cov-report=term-missing','--profile','--profile-svg'])
         raise SystemExit(errno)
 
 
@@ -59,7 +59,7 @@ setup(
     packages = find_packages(exclude=['docs', 'tests*']),
     install_requires = ['docopt'],
     extras_require = {
-        'test': ['coverage', 'pytest', 'pytest-cov'],
+        'test': ['coverage', 'pytest', 'pytest-cov','pytest-profiling'],
     },
     entry_points = {
         'console_scripts': [
