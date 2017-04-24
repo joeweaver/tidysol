@@ -10,9 +10,10 @@ class Tidy(Base):
     
     def run(self):
         try:
-            print(self.options)
             c=ComsolExportFile(self.options["<name>"])    
-
+            for t in self.options["--times"]:
+                if t not in c.timesteps:
+                    raise TidysolException("Could not find data for time {0}".format(t))
         #not much to do with unexpected exceptions other than print them out
         except Exception as e: 
             print(e)

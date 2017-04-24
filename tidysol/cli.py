@@ -5,7 +5,7 @@ Usage:
   tidysol times <name>
   tidysol vars <name>
   tidysol meta <name> [--values]
-  tidysol tidy <name> [--time=<time> ... ] [--col=<variable> ...] [-o=<outfile>]
+  tidysol tidy <name> [--times=<time> ... ] [--cols=<variable> ...] [-o=<outfile>]
   tidysol -h | --help
   tidysol -v | --version
 
