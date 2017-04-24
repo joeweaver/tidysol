@@ -12,6 +12,7 @@ class ComsolExportFile(object):
         self.filename=filename
         self.timesteps=set() 
         self.columnVars=collections.OrderedDict()
+        self.metaData=dict()
         
         error_to_catch = getattr(__builtins__,'FileNotFoundError', IOError)
         #TODO this is an ad-hoc parse built up from unit tests and miht benefit from refactoring
@@ -29,8 +30,8 @@ class ComsolExportFile(object):
             varDescs=[]
             for line in open(self.filename,"r"):
                 linecount=linecount + 1
-                matchHead= re.search('^%',line)
-                if matchHead:
+                matchComment= re.search('^%',line)
+                if matchComment:
                     varReg='([\w|\.]+)\s*(\(*\S*\)*)\s*\@\s*t=(\d\.*\d*)\s*'
                     matchVar = re.findall(varReg,line) #using findall for easy len
                     if matchVar:
@@ -42,6 +43,10 @@ class ComsolExportFile(object):
                             foundAt = re.search(varReg,line)
                             possibleDims=line[1:foundAt.start()-1]
                             dimVars = possibleDims.split()
+                    else:
+                        matchMeta=re.search('^%\s*(\S*)\s*:\s*(.*)',line)
+                        if matchMeta:
+                            self.metaData[matchMeta.group(1)]=matchMeta.group(2)
                 else:
                     nodeCount=nodeCount+1
                 matchExpressionCount = re.search('^% Expressions:\s+(\d+)',line)
