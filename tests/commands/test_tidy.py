@@ -48,13 +48,30 @@ class TestTidy(TestCase):
         self.maxDiff=None
         self.assertMultiLineEqual(goldtext,writtentext)    
         
-    #two time steps default time,defualt vars, output to terminal
+    #two time steps default time,defualt vars
+    def test_multiple_timestep_all_default(self):   
+        #TODO some odd gymnastics to handle test files and temp file writing. There's probably  a better way        
+        fgold = open("tests\\commands\\data\\goldfiles\\two_timestep_all_default.csv")
+        savewd = os.getcwd()
+        shutil.copyfile('tests\\commands\\data\\good-two-timestep.txt',self.test_dir+"\\good-two-timestep.txt")
+        os.chdir(self.test_dir)   
+        popen(['tidysol', 'tidy', self.test_dir+"\\good-two-timestep.txt"], stdout=PIPE).communicate()[0].decode("utf-8")
+        fwritten = open(self.test_dir+"\\good-two-timestep.csv")
+        goldtext=fgold.read()
+        writtentext=fwritten.read()
+        fgold.close()
+        fwritten.close()       
+        os.chdir(savewd)     
+        fdebug = open("tests\\debug-dump.txt","w")
+        fdebug.write(writtentext)
+        self.maxDiff=None
+        self.assertMultiLineEqual(goldtext,writtentext)  
         
     #two time steps only first time,defualt vars, output to terminal
     
     #two time steps LAST kewword time,defualt vars, output to terminal
     
-    #two time steps both times explicit kewword time,incorrect var name, output to terminal  
+    #two time steps both times explicit keyword time,incorrect var name, output to terminal  
       
     #two time steps default time,do not inlcude pressure var, output to terminal 
         
@@ -67,13 +84,3 @@ class TestTidy(TestCase):
     #test for duplicate specified vars
     
     #test for specified incorrect directory
-#==============================================================================
-#                 # Create a file in the temporary directory
-#         f = open(path.join(self.test_dir, 'test.txt'), 'w')
-#         # Write something to it
-#         f.write('The owls are not what they seem')
-#         # Reopen the file and check if what we read back is the same
-#         f = open(path.join(self.test_dir, 'test.txt'))
-#         self.assertEqual(f.read(), 'The owls are not what they seem')
-#==============================================================================
-    

@@ -4,3 +4,4 @@
 build
 dist
 prof
+tests/debug-dump.txt

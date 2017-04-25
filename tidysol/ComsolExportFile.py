@@ -129,19 +129,20 @@ class ComsolExportFile(object):
         headerline=",".join(str(h) for h in headers)
         
         output=headerline
-        #could probably get clever with itertools here
-        colsToWrite=[]
-        for c in range(0,len(self.dimVars)):
-            colsToWrite.append(c+1)
-            
-        col=len(self.dimVars)+1
+
 
         for ts in self.timesteps:
+            #could probably get clever with itertools here
+            colsToWrite=[]
+            for c in range(0,len(self.dimVars)):
+                colsToWrite.append(c+1)
+                
+            col=len(self.dimVars)+1
             if(ts in timesToWrite):
                 for (varn,units,timestep) in self.foundVars:
                     if(str(ts) == str(timestep)):
                         colsToWrite.append(col)
-                        col=col+1
+                    col=col+1
         
                 try:
                     for line in open(self.filename,"r"):
