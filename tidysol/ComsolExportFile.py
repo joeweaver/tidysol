@@ -86,17 +86,16 @@ class ComsolExportFile(object):
                 expected=int(numExpressions)+int(numDimensions)
                 if len(foundVars)+len(dimVars) == expected:
                     varnum=0
-                    #if performance is an issue, we could get more clever about this                    
+                    #if performance is an issue, we could get more clever about this    
+                    for d in dimVars:
+                        self.columnVars[d]=""
                     for (varn,units,timestep) in foundVars:
                        self.timesteps.add(float(timestep))
 
                        #slightly hacky - there is a varn for each repeated timestep. Once we get to the end of the descriptions, we're looping around, so exit the iteration
                        #there's a few hole in it, but the internal consistency checks should catch them first (famous last words)                    
-                       if varnum<(numDesc-1):
-                           if(varnum<int(numDimensions)):
-                              self.columnVars[dimVars[varnum]]=" "
-                           else:
-                              self.columnVars[varn]="{0}".format(varDescs[varnum])     
+                       if varnum<(numDesc):
+                           self.columnVars[varn]="{0}".format(varDescs[varnum])     
                        varnum=varnum+1          
                 else:
                     raise TidysolException('Expected {0} variables ({1} dimensions and {2} expressions) but found {3} ({4} dimensions and {5} expressions)'.format(expected,numDimensions,numExpressions,len(foundVars)+len(dimVars),len(dimVars),len(foundVars)))               

@@ -32,7 +32,12 @@ If you're very interested in tidy data, the open access journal article* describ
 Limitations:
 Only test on output from COMSOL 4.3a. Further, I only use these options for export:
 --TODO list options here.  If you use a different version or export options, use at your own risk.
+
+Acknowledgements:
+This cli was fleshed out from the skeleton CLI framework provided by https://github.com/rdegges/skele-cli
+Also, thanks to countless commenters on random google searches and stackoverflow
 """
+
 
 
 from inspect import getmembers, isclass
