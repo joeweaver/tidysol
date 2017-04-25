@@ -156,5 +156,5 @@ class ComsolExportFile(object):
                 except self.error_to_catch:
                     raise(TidysolException("Could not find file: "+self.filename))
              
-        return (output)
+        return (output+"\n")
         

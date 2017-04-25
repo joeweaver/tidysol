@@ -4,7 +4,7 @@
 from subprocess import PIPE, Popen as popen
 from unittest import TestCase
 import shutil, tempfile
-from os import path
+import os
 
 class TestTidy(TestCase):
     #temp directory method of testing files courtesy of  https://gist.github.com/odyniec/d4ea0959d4e0ba17a980
@@ -31,12 +31,22 @@ class TestTidy(TestCase):
         output = popen(['tidysol', 'tidy', 'tests\\commands\\data\\good-single-timestep.txt','--times={0}'.format(time)], stdout=PIPE,bufsize=16384).communicate()[0].decode("utf-8")
         assert(expected == output.rstrip())  
     
-    #base case for single time step, default time,defualt vars, output to terminal
+    #base case for single time step, default time,defualt vars
     def test_single_timestep_all_default(self):     
-        f = open("tests\\commands\\data\\goldfiles\\single_timestep_all_default.csv")
-        expected=f.read()
-        output = popen(['tidysol', 'tidy', 'tests\\commands\\data\\good-single-timestep.txt'], stdout=PIPE).communicate()[0].decode("utf-8")
-        assert(expected == output.rstrip())    
+        #TODO some odd gymnastics to handle test files and temp file writing. There's probably  a better way        
+        fgold = open("tests\\commands\\data\\goldfiles\\single_timestep_all_default.csv")
+        savewd = os.getcwd()
+        shutil.copyfile('tests\\commands\\data\\good-single-timestep.txt',self.test_dir+"\\good-single-timestep.txt")
+        os.chdir(self.test_dir)   
+        popen(['tidysol', 'tidy', self.test_dir+"\\good-single-timestep.txt"], stdout=PIPE).communicate()[0].decode("utf-8")
+        fwritten = open(self.test_dir+"\\good-single-timestep.csv")
+        goldtext=fgold.read()
+        writtentext=fwritten.read()
+        fgold.close()
+        fwritten.close()       
+        os.chdir(savewd)       
+        self.maxDiff=None
+        self.assertMultiLineEqual(goldtext,writtentext)    
         
     #two time steps default time,defualt vars, output to terminal
         
@@ -50,7 +60,13 @@ class TestTidy(TestCase):
         
     #two time steps default time,do not inlcude dat metadatar, output to terminal      
         
-    #two time steps LAST kewword time,defualt vars, output to file
+    #two time steps LAST kewword time,defualt vars, output to non-default file
+    
+    #test for duplicate specfied timesteps
+    
+    #test for duplicate specified vars
+    
+    #test for specified incorrect directory
 #==============================================================================
 #                 # Create a file in the temporary directory
 #         f = open(path.join(self.test_dir, 'test.txt'), 'w')
