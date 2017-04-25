@@ -13,15 +13,14 @@ class ComsolExportFile(object):
         self.timesteps=set() 
         self.columnVars=collections.OrderedDict()
         self.metaData=dict()
-        
-        error_to_catch = getattr(__builtins__,'FileNotFoundError', IOError)
+        self.dimVars=[]
+        self.error_to_catch = getattr(__builtins__,'FileNotFoundError', IOError)
+        self.foundVars=None
         #TODO this is an ad-hoc parse built up from unit tests and miht benefit from refactoring
         try:
             NOT_MATCHED=-1
             linecount = 0
-            foundVars=None
             varsLine=NOT_MATCHED
-            dimVars = None
             numExpressions=NOT_MATCHED
             numDimensions=NOT_MATCHED
             numNodesMeta=NOT_MATCHED
@@ -35,16 +34,16 @@ class ComsolExportFile(object):
                     varReg='([\w|\.]+)\s*(\(*\S*\)*)\s*\@\s*t=(\d\.*\d*)\s*'
                     matchVar = re.findall(varReg,line) #using findall for easy len
                     if matchVar:
-                        if(foundVars):
+                        if(self.foundVars):
                             raise TidysolException("Found more than one line naming variables: "+str(varsLine) + " & " + str(linecount))
                         else:
                             varsLine=linecount
-                            foundVars=matchVar
+                            self.foundVars=matchVar
                             foundAt = re.search(varReg,line)
                             possibleDims=line[1:foundAt.start()-1]
-                            dimVars = possibleDims.split()
+                            self.dimVars = possibleDims.split()
                     else:
-                        matchMeta=re.search('^%\s*(\S*)\s*:\s*(.*)',line)
+                        matchMeta=re.search('^%\s*([^\:]*):\s*(.*)',line)
                         if matchMeta:
                             self.metaData[matchMeta.group(1)]=matchMeta.group(2)
                 else:
@@ -82,14 +81,14 @@ class ComsolExportFile(object):
                 raise TidysolException('Expected {0} nodes but read {1}'.format(numNodesMeta,nodeCount))
              
             
-            if foundVars:
+            if self.foundVars:
                 expected=int(numExpressions)+int(numDimensions)
-                if len(foundVars)+len(dimVars) == expected:
+                if len(self.foundVars)+len(self.dimVars) == expected:
                     varnum=0
                     #if performance is an issue, we could get more clever about this    
-                    for d in dimVars:
+                    for d in self.dimVars:
                         self.columnVars[d]=""
-                    for (varn,units,timestep) in foundVars:
+                    for (varn,units,timestep) in self.foundVars:
                        self.timesteps.add(float(timestep))
 
                        #slightly hacky - there is a varn for each repeated timestep. Once we get to the end of the descriptions, we're looping around, so exit the iteration
@@ -98,7 +97,7 @@ class ComsolExportFile(object):
                            self.columnVars[varn]="{0}".format(varDescs[varnum])     
                        varnum=varnum+1          
                 else:
-                    raise TidysolException('Expected {0} variables ({1} dimensions and {2} expressions) but found {3} ({4} dimensions and {5} expressions)'.format(expected,numDimensions,numExpressions,len(foundVars)+len(dimVars),len(dimVars),len(foundVars)))               
+                    raise TidysolException('Expected {0} variables ({1} dimensions and {2} expressions) but found {3} ({4} dimensions and {5} expressions)'.format(expected,numDimensions,numExpressions,len(self.foundVars)+len(self.dimVars),len(self.dimVars),len(self.foundVars)))               
             else:
                 raise TidysolException("Could not find a line defining variables") 
                 
@@ -106,14 +105,56 @@ class ComsolExportFile(object):
             if(expectedDesc!=numDesc):
                 raise TidysolException('Expected {0} descriptions of variables but read {1}'.format(int(expectedDesc),numDesc))
        
-        except error_to_catch:
+        except self.error_to_catch:
             raise(TidysolException("Could not find file: "+self.filename))
     def vars_w_descs(self):
         var_descs=[]   
         for v in self.columnVars:
             var_descs.append("{0} [{1}]".format(v,self.columnVars[v]))
         return(var_descs)
-    def to_csv(self):
-        headers=["t"]+self.dimVars+sorted(self.metaData.keys())
         
-        return ("")
+    def to_csv(self):
+        metakeys=[]
+        metaToWrite=[]
+        #default, write all timesteps
+        timesToWrite=self.timesteps
+        
+        for m in sorted(self.metaData.keys()):
+            #by default, do not include metadata now made redundant. Particularly the variable description list
+            if(m not in ['Expressions','Dimension','Nodes','Description']):
+                metakeys.append("{0} []".format(m))
+                metaToWrite.append(re.sub('\s*,\s*',' - ',self.metaData[m]))
+
+        headers=["t []"]+self.vars_w_descs()+metakeys
+        headerline=",".join(str(h) for h in headers)
+        
+        output=headerline
+        #could probably get clever with itertools here
+        colsToWrite=[]
+        for c in range(0,len(self.dimVars)):
+            colsToWrite.append(c+1)
+            
+        col=len(self.dimVars)+1
+
+        for ts in self.timesteps:
+            if(ts in timesToWrite):
+                for (varn,units,timestep) in self.foundVars:
+                    if(str(ts) == str(timestep)):
+                        colsToWrite.append(col)
+                        col=col+1
+        
+                try:
+                    for line in open(self.filename,"r"):
+                        matchComment= re.search('^%',line)
+                        if not matchComment:
+                            cols=re.split('\s\s+',line.strip())
+                            writeMe=[ts]
+                            for i in colsToWrite:
+                                writeMe.append(cols[i-1])
+                            writeMe=writeMe+metaToWrite
+                            output=output+"\n"+",".join(str(c) for c in writeMe)
+                except self.error_to_catch:
+                    raise(TidysolException("Could not find file: "+self.filename))
+             
+        return (output)
+        
