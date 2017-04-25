@@ -108,3 +108,12 @@ class ComsolExportFile(object):
        
         except error_to_catch:
             raise(TidysolException("Could not find file: "+self.filename))
+    def vars_w_descs(self):
+        var_descs=[]   
+        for v in self.columnVars:
+            var_descs.append("{0} [{1}]".format(v,self.columnVars[v]))
+        return(var_descs)
+    def to_csv(self):
+        headers=["t"]+self.dimVars+sorted(self.metaData.keys())
+        
+        return ("")
