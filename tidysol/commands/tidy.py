@@ -11,17 +11,24 @@ class Tidy(Base):
     
     def run(self):
         try:
-            c=ComsolExportFile(self.options["<name>"])    
-            for t in self.options["--times"]:
-                if not re.match('^\d*\.?\d$',t):
-                   raise (TidysolException("{0} is not a valid timestep. Only digits and a single decimal point allowed".format(t))) 
-                if t not in c.timesteps:
-                    raise TidysolException("Could not find data for time {0}".format(t))
+            c=ComsolExportFile(self.options["<name>"])       
+            writeTimes=[]
+            if(self.options["--times"]):
+                writeTimes = re.split(",",self.options["--times"][0])
+
+            for t in writeTimes:
+                if t.casefold()!="last".casefold():                   
+                    if (not re.match('^\d*\.?\d$',t)):
+                           raise (TidysolException("{0} is not a valid timestep".format(t))) 
+                    if float(t) not in c.timesteps:
+                        raise TidysolException("Could not find data for time {0}".format(t))
             base = os.path.basename(self.options["<name>"])
             fname = os.path.splitext(base)[0]
             o = open("{0}.csv".format(fname),"w")
-            o.write(c.to_csv())
-            o.close()
+            try:
+                o.write(c.to_csv(writeTimes))
+            finally:
+                o.close()
         #not much to do with unexpected exceptions other than print them out
         except Exception as e: 
             print(e)

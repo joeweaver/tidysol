@@ -48,6 +48,7 @@ class ComsolExportFile(object):
                             self.metaData[matchMeta.group(1)]=matchMeta.group(2)
                 else:
                     nodeCount=nodeCount+1
+                #TODO this repetivie code can be handled better now that we're matching all meta
                 matchExpressionCount = re.search('^% Expressions:\s+(\d+)',line)
                 if matchExpressionCount:
                     numExpressions = matchExpressionCount.group(1)
@@ -113,11 +114,21 @@ class ComsolExportFile(object):
             var_descs.append("{0} [{1}]".format(v,self.columnVars[v]))
         return(var_descs)
         
-    def to_csv(self):
+    def to_csv(self,timesToWrite=[]):       
         metakeys=[]
         metaToWrite=[]
         #default, write all timesteps
-        timesToWrite=self.timesteps
+        if not timesToWrite:
+            timesToWrite=self.timesteps
+        else:
+            for i in range(0,len(timesToWrite)):
+                if timesToWrite[i].casefold()=="last".casefold():
+                    timesToWrite[i]=max(self.timesteps)
+  
+        #enforce unique
+        timesToWrite=list(set(timesToWrite))  
+        #if(len(timesToWrite)==1) and (timesToWrite[0].casefold()=="last".casefold()):
+        #    timesToWrite[0]=max(self.timesteps)
         
         for m in sorted(self.metaData.keys()):
             #by default, do not include metadata now made redundant. Particularly the variable description list
@@ -136,9 +147,10 @@ class ComsolExportFile(object):
             colsToWrite=[]
             for c in range(0,len(self.dimVars)):
                 colsToWrite.append(c+1)
-                
             col=len(self.dimVars)+1
-            if(ts in timesToWrite):
+            #having string/float issues all over depending on how stuff
+            #arrives here. Arbitralily casting evering to float at this chokepoint
+            if(float(ts) in [float(i) for i in timesToWrite]):
                 for (varn,units,timestep) in self.foundVars:
                     if(str(ts) == str(timestep)):
                         colsToWrite.append(col)
