@@ -142,10 +142,25 @@ class TestTidy(TestCase):
             if fwritten is not None:
                 fwritten.close()
                 
-    #two time steps both times explicit keyword time,incorrect var name, output to terminal  
-      
-    #two time steps default time,do not inlcude pressure var, output to terminal 
-        
+    #two time steps both times explicit keyword time,incorrect var name  
+    def test_multiple_timestep_bad_var_name(self):   
+        badvar="spf.sr"
+        expected = "Could not find data for variable {0}".format(badvar)        
+        output=popen(['tidysol', 'tidy', 'tests\\commands\\data\\good-single-timestep.txt','--cols={0}'.format(badvar)], stdout=PIPE).communicate()[0].decode("utf-8")
+        assert(expected == output.rstrip())     
+                
+    #two time steps default time,only inlcude shear rate var
+    #just name 'spf2.sr'
+    #name with desc spf2.sr [Shear rate]
+                
+    #two time steps both times explicit keyword time,incorrect var desc  
+    def test_multiple_timestep_bad_var_desc(self):   
+        badvar="spf.sr"
+        expected = "Could not find data for variable {0}".format(badvar)        
+        output=popen(['tidysol', 'tidy', 'tests\\commands\\data\\good-single-timestep.txt','--cols={0}'.format(badvar)], stdout=PIPE).communicate()[0].decode("utf-8")
+        assert(expected == output.rstrip())                     
+                
+    #same with two vars
     #two time steps default time,do not inlcude dat metadatar, output to terminal      
         
     #two time steps LAST kewword time,defualt vars, output to non-default file & directory
@@ -154,7 +169,7 @@ class TestTidy(TestCase):
         
     #large file?
     
-    #NONE for headers
+    #NOHEAD for headers
     
     #test for duplicate specfied timesteps
     

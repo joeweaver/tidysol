@@ -13,6 +13,7 @@ class Tidy(Base):
         try:
             c=ComsolExportFile(self.options["<name>"])       
             writeTimes=[]
+            writeCols=[]
             if(self.options["--times"]):
                 writeTimes = re.split(",",self.options["--times"][0])
 
@@ -22,6 +23,14 @@ class Tidy(Base):
                            raise (TidysolException("{0} is not a valid timestep".format(t))) 
                     if float(t) not in c.timesteps:
                         raise TidysolException("Could not find data for time {0}".format(t))
+            
+            if(self.options["--cols"]):
+                writeCols=re.split(",",self.options["--cols"][0])
+            
+            for col in writeCols:
+                if c.columnVars.get(col) == None and c.metaData.get(col)==None:
+                    raise TidysolException("Could not find data for variable {0}".format(col))
+            
             base = os.path.basename(self.options["<name>"])
             fname = os.path.splitext(base)[0]
             o = open("{0}.csv".format(fname),"w")
