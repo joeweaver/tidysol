@@ -114,7 +114,7 @@ class ComsolExportFile(object):
             var_descs.append("{0} [{1}]".format(v,self.columnVars[v]))
         return(var_descs)
         
-    def to_csv(self,timesToWrite=[]):       
+    def to_csv(self,timesToWrite=[],specifiedCols=[]):       
         metakeys=[]
         metaToWrite=[]
         #default, write all timesteps
@@ -132,14 +132,30 @@ class ComsolExportFile(object):
         
         for m in sorted(self.metaData.keys()):
             #by default, do not include metadata now made redundant. Particularly the variable description list
-            if(m not in ['Expressions','Dimension','Nodes','Description']):
-                metakeys.append("{0} []".format(m))
-                metaToWrite.append(re.sub('\s*,\s*',' - ',self.metaData[m]))
+            if not specifiedCols:            
+                if(m not in ['Expressions','Dimension','Nodes','Description']):
+                    metakeys.append("{0} []".format(m))
+                    metaToWrite.append(re.sub('\s*,\s*',' - ',self.metaData[m]))
+            else:
+                if(m in specifiedCols):
+                    metakeys.append("{0} []".format(m))
+                    metaToWrite.append(re.sub('\s*,\s*',' - ',self.metaData[m])) 
 
-        headers=["t []"]+self.vars_w_descs()+metakeys
-        headerline=",".join(str(h) for h in headers)
-        
+        headerline=""        
+        if not specifiedCols:        
+            headers=["t []"]+self.vars_w_descs()+metakeys
+            headerline=",".join(str(h) for h in headers)
+        else:
+            headers=["t []"]+self.vars_w_descs()[0:len(self.dimVars)]
+            for v in self.vars_w_descs():
+                justVar =re.match('\s*([^\[]*)\s*\[',v)
+                if justVar and str(justVar.group(1)).strip() in specifiedCols:
+                    headers.append(v)
+                headers=headers+metakeys
+                headerline=",".join(str(h) for h in headers)  
         output=headerline
+        
+
 
 
         for ts in self.timesteps:
@@ -151,11 +167,11 @@ class ComsolExportFile(object):
             #having string/float issues all over depending on how stuff
             #arrives here. Arbitralily casting evering to float at this chokepoint
             if(float(ts) in [float(i) for i in timesToWrite]):
-                for (varn,units,timestep) in self.foundVars:
+                for (varn,units,timestep) in self.foundVars:                    
                     if(str(ts) == str(timestep)):
-                        colsToWrite.append(col)
-                    col=col+1
-        
+                        if(varn in specifiedCols) or (not specifiedCols):
+                            colsToWrite.append(col)
+                    col=col+1        
                 try:
                     for line in open(self.filename,"r"):
                         matchComment= re.search('^%',line)

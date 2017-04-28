@@ -151,14 +151,37 @@ class TestTidy(TestCase):
                 
     #two time steps default time,only inlcude shear rate var
     #just name 'spf2.sr'
+    def test_multiple_timestep_only_one_var(self):   
+        #TODO some odd gymnastics to handle test files and temp file writing. There's probably  a better way        
+        fgold = open("tests\\commands\\data\\goldfiles\\two_timestep_one_var.csv")     
+        fdebug= open("tests\\debug-dump.txt","w")
+        fwritten=None
+        savewd = os.getcwd()
+        shutil.copyfile('tests\\commands\\data\\good-two-timestep.txt',self.test_dir+"\\good-two-timestep.txt")
+        os.chdir(self.test_dir)  
+        try:
+            popen(['tidysol', 'tidy', self.test_dir+"\\good-two-timestep.txt",'--cols=spf2.sr'], stdout=PIPE).communicate()[0].decode("utf-8")
+            fwritten = open(self.test_dir+"\\good-two-timestep.csv") 
+            goldtext=fgold.read()
+            writtentext=fwritten.read()
+            fgold.close()
+            fwritten.close()       
+            os.chdir(savewd)     
+
+            fdebug.write(writtentext)
+            self.maxDiff=None
+            self.assertMultiLineEqual(goldtext,writtentext)
+        finally:
+            os.chdir(savewd)     
+            fgold.close()
+            fdebug.close()
+            os.chdir(savewd)  
+            if fwritten is not None:
+                fwritten.close()
     #name with desc spf2.sr [Shear rate]
                 
     #two time steps both times explicit keyword time,incorrect var desc  
-    def test_multiple_timestep_bad_var_desc(self):   
-        badvar="spf.sr"
-        expected = "Could not find data for variable {0}".format(badvar)        
-        output=popen(['tidysol', 'tidy', 'tests\\commands\\data\\good-single-timestep.txt','--cols={0}'.format(badvar)], stdout=PIPE).communicate()[0].decode("utf-8")
-        assert(expected == output.rstrip())                     
+                 
                 
     #same with two vars
     #two time steps default time,do not inlcude dat metadatar, output to terminal      

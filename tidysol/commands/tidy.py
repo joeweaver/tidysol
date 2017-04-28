@@ -35,7 +35,7 @@ class Tidy(Base):
             fname = os.path.splitext(base)[0]
             o = open("{0}.csv".format(fname),"w")
             try:
-                o.write(c.to_csv(writeTimes))
+                o.write(c.to_csv(writeTimes,writeCols))
             finally:
                 o.close()
         #not much to do with unexpected exceptions other than print them out
