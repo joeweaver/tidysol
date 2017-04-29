@@ -284,7 +284,7 @@ class TestTidy(TestCase):
         shutil.copyfile('tests\\commands\\data\\good-two-timestep.txt',self.test_dir+"\\good-two-timestep.txt")
         os.chdir(self.test_dir)  
         try:
-            open(['tidysol', 'tidy', self.test_dir+"\\good-two-timestep.txt",'--cols="spf2.sr [Shear rate],spf2.cellRe [Cell Reynolds number]"'], stdout=PIPE).communicate()[0].decode("utf-8")       
+            popen(['tidysol', 'tidy', self.test_dir+"\\good-two-timestep.txt",'--cols="spf2.sr [Shear rate],spf2.cellRe [Cell Reynolds number]"'], stdout=PIPE).communicate()[0].decode("utf-8")       
             fwritten = open(self.test_dir+"\\good-two-timestep.csv") 
             goldtext=fgold.read()
             writtentext=fwritten.read()
