@@ -5,6 +5,7 @@ from subprocess import PIPE, Popen as popen
 from unittest import TestCase
 import shutil, tempfile
 import os
+import re
 
 class TestTidy(TestCase):
     #temp directory method of testing files courtesy of  https://gist.github.com/odyniec/d4ea0959d4e0ba17a980
@@ -207,23 +208,28 @@ class TestTidy(TestCase):
             fdebug.close()
             os.chdir(savewd)  
             if fwritten is not None:
-                fwritten.close()         
-    #two time steps both times explicit keyword time,incorrect var desc  
+                fwritten.close()       
+                
+    #incorrect var desc
+    def test_multiple_timestep_bad_var_desc(self):   
+        badvar='"spf.sr [Shearr rate]"'
+        expected = "Could not find data for variable {0}".format(re.sub('\"','',badvar))        
+        output=popen(['tidysol', 'tidy', 'tests\\commands\\data\\good-single-timestep.txt','--cols={0}'.format(badvar)], stdout=PIPE).communicate()[0].decode("utf-8")
+        assert(expected == output.rstrip())  
+    #two time steps both times explicit, using LAST keyword  
                  
                 
-    #same with two vars
-    #two time steps default time,do not inlcude dat metadatar, output to terminal      
+    #two vars
+                
+    #two time steps default time,do not inlcude metadata (NOMETA keyword)      
         
-    #two time steps LAST kewword time,defualt vars, output to non-default file & directory
+    #two time steps LAST keyword ,defualt vars, output to non-default file & directory
         
-    #dir does not exist
+    #output dir does not exist
         
     #large file?
     
-    #NOHEAD for headers
-    
+
     #test for duplicate specfied timesteps
     
     #test for duplicate specified vars
-    
-    #test for specified incorrect directory

@@ -176,7 +176,8 @@ class ComsolExportFile(object):
                     if(str(ts) == str(timestep)):
                         if(not specifiedCols):
                             colsToWrite.append(col)
-                        else:                        
+                        else:                     
+                            #TODO refactor. This is repeate code from above and messy
                             for sc in specifiedCols:
                                 scmatch=re.match('\s*([^\[]*)(\s*\[(.*)\])*',sc)
                                 scname=scmatch.group(1)
