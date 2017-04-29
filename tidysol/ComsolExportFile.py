@@ -163,7 +163,7 @@ class ComsolExportFile(object):
             headers=headers+metakeys
             headerline=",".join(str(h) for h in headers)  
         output=headerline
-        print(output)
+
         for ts in self.timesteps:
             #could probably get clever with itertools here
             colsToWrite=[]

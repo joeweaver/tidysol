@@ -35,6 +35,8 @@ class TestTidy(TestCase):
     #base case for single time step, default time,defualt vars
     def test_single_timestep_all_default(self):     
         #TODO some odd gymnastics to handle test files and temp file writing. There's probably  a better way        
+        #one option is to test the output string in  ComsolExportFile to_csv() then either trust tidy to make the correct call to_csv and write file
+        #or do a little mocking
         #TODO should probably factor out all the common file handling in the next few tests        
         fgold = open("tests\\commands\\data\\goldfiles\\single_timestep_all_default.csv")
         savewd = os.getcwd()
@@ -330,12 +332,64 @@ class TestTidy(TestCase):
             os.chdir(savewd)  
             if fwritten is not None:
                 fwritten.close()
-    #two time steps default time,do not inlcude metadata (NOMETA keyword)      
         
     #two time steps LAST keyword ,defualt vars, output to non-default file & directory
-        
+    def test_multiple_timestep_specify_filename(self):   
+        #TODO some odd gymnastics to handle test files and temp file writing. There's probably  a better way        
+        fgold = open("tests\\commands\\data\\goldfiles\\two_timestep_all_default.csv")     
+        fdebug= open("tests\\debug-dump.txt","w")
+        fwritten=None
+        savewd = os.getcwd()
+        shutil.copyfile('tests\\commands\\data\\good-two-timestep.txt',self.test_dir+"\\good-two-timestep.txt")
+        os.chdir(self.test_dir)  
+        try:
+            popen(['tidysol', 'tidy', self.test_dir+"\\good-two-timestep.txt",'--output=newname.csv'], stdout=PIPE).communicate()[0].decode("utf-8")
+            fwritten = open(self.test_dir+"\\newname.csv") 
+            goldtext=fgold.read()
+            writtentext=fwritten.read()
+            fgold.close()
+            fwritten.close()       
+            os.chdir(savewd)     
+
+            fdebug.write(writtentext)
+            self.maxDiff=None
+            self.assertMultiLineEqual(goldtext,writtentext)
+        finally:
+            os.chdir(savewd)     
+            fgold.close()
+            fdebug.close()
+            os.chdir(savewd)  
+            if fwritten is not None:
+                fwritten.close()        
     #output dir does not exist
-        
+    def test_multiple_timestep_specify_filename_w_newdir(self):   
+        #TODO some odd gymnastics to handle test files and temp file writing. There's probably  a better way        
+        fgold = open("tests\\commands\\data\\goldfiles\\two_timestep_all_default.csv")     
+        fdebug= open("tests\\debug-dump.txt","w")
+        fwritten=None
+        savewd = os.getcwd()
+        shutil.copyfile('tests\\commands\\data\\good-two-timestep.txt',self.test_dir+"\\good-two-timestep.txt")
+        os.chdir(self.test_dir)  
+        try:
+            popen(['tidysol', 'tidy', self.test_dir+"\\good-two-timestep.txt",'--output=newdir\\newname.csv'], stdout=PIPE).communicate()[0].decode("utf-8")
+            fwritten = open(self.test_dir+"\\newdir\\newname.csv") 
+            goldtext=fgold.read()
+            writtentext=fwritten.read()
+            fgold.close()
+            fwritten.close()       
+            os.chdir(savewd)     
+
+            fdebug.write(writtentext)
+            self.maxDiff=None
+            self.assertMultiLineEqual(goldtext,writtentext)
+        finally:
+            os.chdir(savewd)     
+            fgold.close()
+            fdebug.close()
+            os.chdir(savewd)  
+            if fwritten is not None:
+                fwritten.close()   
+    #specify times vars and output    
     #large file?
     
 

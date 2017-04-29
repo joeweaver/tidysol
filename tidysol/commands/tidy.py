@@ -34,7 +34,14 @@ class Tidy(Base):
             
             base = os.path.basename(self.options["<name>"])
             fname = os.path.splitext(base)[0]
-            o = open("{0}.csv".format(fname),"w")
+            o=None
+            if not(self.options["--output"]):
+                o = open("{0}.csv".format(fname),"w")
+            else:
+                outfilename=self.options["--output"]
+                if os.path.dirname(outfilename) :
+                    os.makedirs(os.path.dirname(outfilename), exist_ok=True)
+                o=open(outfilename,"w")
             try:
                 o.write(c.to_csv(writeTimes,writeCols))
             finally:
