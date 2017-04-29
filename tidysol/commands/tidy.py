@@ -26,7 +26,7 @@ class Tidy(Base):
             
             if(self.options["--cols"]):
                 writeCols=re.split(",",re.sub('\"','',self.options["--cols"][0]))
-                
+
             for col in writeCols:
                 if c.columnVars.get(col) == None and c.metaData.get(col)==None:
                     if not col in c.vars_w_descs():
