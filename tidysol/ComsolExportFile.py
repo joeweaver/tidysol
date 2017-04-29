@@ -129,7 +129,7 @@ class ComsolExportFile(object):
         timesToWrite=list(set(timesToWrite))  
         #if(len(timesToWrite)==1) and (timesToWrite[0].casefold()=="last".casefold()):
         #    timesToWrite[0]=max(self.timesteps)
-        
+
         for m in sorted(self.metaData.keys()):
             #by default, do not include metadata now made redundant. Particularly the variable description list
             if not specifiedCols:            
@@ -148,16 +148,21 @@ class ComsolExportFile(object):
         else:
             headers=["t []"]+self.vars_w_descs()[0:len(self.dimVars)]
             for v in self.vars_w_descs():
-                justVar =re.match('\s*([^\[]*)\s*\[',v)
-                if justVar and str(justVar.group(1)).strip() in specifiedCols:
-                    headers.append(v)
-                headers=headers+metakeys
-                headerline=",".join(str(h) for h in headers)  
+                vardesc =re.match('\s*([^\[]*)(\s*\[(.*)\])*',v)
+                if vardesc:
+                    vname=vardesc.group(1)
+                    vdesc=vardesc.group(3)
+                    for sc in specifiedCols:
+                        scmatch=re.match('\s*([^\[]*)(\s*\[(.*)\])*',sc)
+                        scname=scmatch.group(1)
+                        scdesc=scmatch.group(3)
+                        matchDesc = (not scdesc) or (not vdesc) or (scdesc.strip() == vdesc.strip())
+                        matchName=vname.strip()==scname.strip()
+                        if matchName and matchDesc:
+                            headers.append(v)
+                    headers=headers+metakeys
+                    headerline=",".join(str(h) for h in headers)  
         output=headerline
-        
-
-
-
         for ts in self.timesteps:
             #could probably get clever with itertools here
             colsToWrite=[]
@@ -169,8 +174,15 @@ class ComsolExportFile(object):
             if(float(ts) in [float(i) for i in timesToWrite]):
                 for (varn,units,timestep) in self.foundVars:                    
                     if(str(ts) == str(timestep)):
-                        if(varn in specifiedCols) or (not specifiedCols):
+                        if(not specifiedCols):
                             colsToWrite.append(col)
+                        else:                        
+                            for sc in specifiedCols:
+                                scmatch=re.match('\s*([^\[]*)(\s*\[(.*)\])*',sc)
+                                scname=scmatch.group(1)
+                                matchName=varn.strip()==scname.strip()
+                            if matchName:
+                                colsToWrite.append(col)
                     col=col+1        
                 try:
                     for line in open(self.filename,"r"):
@@ -184,6 +196,5 @@ class ComsolExportFile(object):
                             output=output+"\n"+",".join(str(c) for c in writeMe)
                 except self.error_to_catch:
                     raise(TidysolException("Could not find file: "+self.filename))
-             
         return (output+"\n")
         

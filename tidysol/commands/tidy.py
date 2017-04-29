@@ -25,11 +25,12 @@ class Tidy(Base):
                         raise TidysolException("Could not find data for time {0}".format(t))
             
             if(self.options["--cols"]):
-                writeCols=re.split(",",self.options["--cols"][0])
-            
+                writeCols=re.split(",",re.sub('\"','',self.options["--cols"][0]))
+                
             for col in writeCols:
                 if c.columnVars.get(col) == None and c.metaData.get(col)==None:
-                    raise TidysolException("Could not find data for variable {0}".format(col))
+                    if not col in c.vars_w_descs():
+                        raise TidysolException("Could not find data for variable {0}".format(col))
             
             base = os.path.basename(self.options["<name>"])
             fname = os.path.splitext(base)[0]

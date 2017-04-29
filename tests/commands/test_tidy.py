@@ -178,8 +178,36 @@ class TestTidy(TestCase):
             os.chdir(savewd)  
             if fwritten is not None:
                 fwritten.close()
-    #name with desc spf2.sr [Shear rate]
                 
+    #name with desc spf2.sr [Shear rate]
+    def test_multiple_timestep_only_one_var_w_desc(self):   
+        #TODO some odd gymnastics to handle test files and temp file writing. There's probably  a better way        
+        fgold = open("tests\\commands\\data\\goldfiles\\two_timestep_one_var.csv")     
+        fdebug= open("tests\\debug-dump.txt","w")
+        fwritten=None
+        savewd = os.getcwd()
+        shutil.copyfile('tests\\commands\\data\\good-two-timestep.txt',self.test_dir+"\\good-two-timestep.txt")
+        os.chdir(self.test_dir)  
+        try:
+            output=popen(['tidysol', 'tidy', self.test_dir+"\\good-two-timestep.txt",'--cols="spf2.sr [Shear rate]"'], stdout=PIPE).communicate()[0].decode("utf-8")
+            print(output)            
+            fwritten = open(self.test_dir+"\\good-two-timestep.csv") 
+            goldtext=fgold.read()
+            writtentext=fwritten.read()
+            fgold.close()
+            fwritten.close()       
+            os.chdir(savewd)     
+
+            fdebug.write(writtentext)
+            self.maxDiff=None
+            self.assertMultiLineEqual(goldtext,writtentext)
+        finally:
+            os.chdir(savewd)     
+            fgold.close()
+            fdebug.close()
+            os.chdir(savewd)  
+            if fwritten is not None:
+                fwritten.close()         
     #two time steps both times explicit keyword time,incorrect var desc  
                  
                 
