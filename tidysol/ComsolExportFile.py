@@ -137,7 +137,7 @@ class ComsolExportFile(object):
                     metakeys.append("{0} []".format(m))
                     metaToWrite.append(re.sub('\s*,\s*',' - ',self.metaData[m]))
             else:
-                if(m in specifiedCols):
+                if(m.strip() in specifiedCols):
                     metakeys.append("{0} []".format(m))
                     metaToWrite.append(re.sub('\s*,\s*',' - ',self.metaData[m])) 
 
@@ -160,9 +160,10 @@ class ComsolExportFile(object):
                         matchName=vname.strip()==scname.strip()
                         if matchName and matchDesc:
                             headers.append(v)
-                    headers=headers+metakeys
-                    headerline=",".join(str(h) for h in headers)  
+            headers=headers+metakeys
+            headerline=",".join(str(h) for h in headers)  
         output=headerline
+        print(output)
         for ts in self.timesteps:
             #could probably get clever with itertools here
             colsToWrite=[]

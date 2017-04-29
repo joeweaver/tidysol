@@ -273,7 +273,6 @@ class TestTidy(TestCase):
             os.chdir(savewd)  
             if fwritten is not None:
                 fwritten.close()
-        #two time steps default time,only inlcude shear rate var and reynolds #
                 
     def test_multiple_timestep_two_var_wdesc(self):   
         #TODO some odd gymnastics to handle test files and temp file writing. There's probably  a better way        
@@ -303,7 +302,34 @@ class TestTidy(TestCase):
             if fwritten is not None:
                 fwritten.close()
                 
-    #two times steps only include sr and Date meta
+    #two times steps only include sr,cellRe and Date meta
+    def test_multiple_timestep_two_var_one_meta(self):   
+        #TODO some odd gymnastics to handle test files and temp file writing. There's probably  a better way        
+        fgold = open("tests\\commands\\data\\goldfiles\\two_timestep_two_var_one_meta.csv")     
+        fdebug= open("tests\\debug-dump.txt","w")
+        fwritten=None
+        savewd = os.getcwd()
+        shutil.copyfile('tests\\commands\\data\\good-two-timestep.txt',self.test_dir+"\\good-two-timestep.txt")
+        os.chdir(self.test_dir)  
+        try:
+            popen(['tidysol', 'tidy', self.test_dir+"\\good-two-timestep.txt",'--cols=spf2.sr,spf2.cellRe,Date'], stdout=PIPE).communicate()[0].decode("utf-8")
+            fwritten = open(self.test_dir+"\\good-two-timestep.csv") 
+            goldtext=fgold.read()
+            writtentext=fwritten.read()
+            fgold.close()
+            fwritten.close()       
+            os.chdir(savewd)     
+
+            fdebug.write(writtentext)
+            self.maxDiff=None
+            self.assertMultiLineEqual(goldtext,writtentext)
+        finally:
+            os.chdir(savewd)     
+            fgold.close()
+            fdebug.close()
+            os.chdir(savewd)  
+            if fwritten is not None:
+                fwritten.close()
     #two time steps default time,do not inlcude metadata (NOMETA keyword)      
         
     #two time steps LAST keyword ,defualt vars, output to non-default file & directory
