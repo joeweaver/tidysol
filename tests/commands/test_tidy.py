@@ -216,8 +216,34 @@ class TestTidy(TestCase):
         expected = "Could not find data for variable {0}".format(re.sub('\"','',badvar))        
         output=popen(['tidysol', 'tidy', 'tests\\commands\\data\\good-single-timestep.txt','--cols={0}'.format(badvar)], stdout=PIPE).communicate()[0].decode("utf-8")
         assert(expected == output.rstrip())  
+        
     #two time steps both times explicit, using LAST keyword  
-                 
+    def test_multiple_timestep_both_times_last_keyword(self):   
+        fgold = open("tests\\commands\\data\\goldfiles\\two_timestep_all_default.csv")     
+        fdebug= open("tests\\debug-dump.txt","w")
+        fwritten=None
+        savewd = os.getcwd()
+        shutil.copyfile('tests\\commands\\data\\good-two-timestep.txt',self.test_dir+"\\good-two-timestep.txt")
+        os.chdir(self.test_dir)  
+        try:
+            popen(['tidysol', 'tidy', self.test_dir+"\\good-two-timestep.txt",'--times=0.1,LAST'], stdout=PIPE).communicate()[0].decode("utf-8")
+            fwritten = open(self.test_dir+"\\good-two-timestep.csv") 
+            goldtext=fgold.read()
+            writtentext=fwritten.read()
+            fgold.close()
+            fwritten.close()       
+            os.chdir(savewd)     
+
+            fdebug.write(writtentext)
+            self.maxDiff=None
+            self.assertMultiLineEqual(goldtext,writtentext)
+        finally:
+            os.chdir(savewd)     
+            fgold.close()
+            fdebug.close()
+            os.chdir(savewd)  
+            if fwritten is not None:
+                fwritten.close()              
                 
     #two vars
                 
