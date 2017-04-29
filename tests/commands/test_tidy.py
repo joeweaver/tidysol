@@ -361,6 +361,7 @@ class TestTidy(TestCase):
             os.chdir(savewd)  
             if fwritten is not None:
                 fwritten.close()        
+    
     #output dir does not exist
     def test_multiple_timestep_specify_filename_w_newdir(self):   
         #TODO some odd gymnastics to handle test files and temp file writing. There's probably  a better way        
@@ -389,10 +390,36 @@ class TestTidy(TestCase):
             os.chdir(savewd)  
             if fwritten is not None:
                 fwritten.close()   
-    #specify times vars and output    
-    #large file?
-    
+    #specify times vars and output
+    def test_multiple_timestep_all_args(self):   
+        #TODO some odd gymnastics to handle test files and temp file writing. There's probably  a better way        
+        fgold = open("tests\\commands\\data\\goldfiles\\two_timestep_all_args.csv")     
+        fdebug= open("tests\\debug-dump.txt","w")
+        fwritten=None
+        savewd = os.getcwd()
+        shutil.copyfile('tests\\commands\\data\\good-two-timestep.txt',self.test_dir+"\\good-two-timestep.txt")
+        os.chdir(self.test_dir)  
+        try:
+            popen(['tidysol', 'tidy', self.test_dir+"\\good-two-timestep.txt",'--times=LAST','--cols=spf2.cellRe', '--output=newdir\\newname.csv'], stdout=PIPE).communicate()[0].decode("utf-8")
+            fwritten = open(self.test_dir+"\\newdir\\newname.csv") 
+            goldtext=fgold.read()
+            writtentext=fwritten.read()
+            fgold.close()
+            fwritten.close()       
+            os.chdir(savewd)     
 
+            fdebug.write(writtentext)
+            self.maxDiff=None
+            self.assertMultiLineEqual(goldtext,writtentext)
+        finally:
+            os.chdir(savewd)     
+            fgold.close()
+            fdebug.close()
+            os.chdir(savewd)  
+            if fwritten is not None:
+                fwritten.close()   
     #test for duplicate specfied timesteps
     
     #test for duplicate specified vars
+                
+    #what about handling a large file?  
