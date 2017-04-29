@@ -182,8 +182,8 @@ class ComsolExportFile(object):
                                 scmatch=re.match('\s*([^\[]*)(\s*\[(.*)\])*',sc)
                                 scname=scmatch.group(1)
                                 matchName=varn.strip()==scname.strip()
-                            if matchName:
-                                colsToWrite.append(col)
+                                if matchName:
+                                    colsToWrite.append(col)
                     col=col+1        
                 try:
                     for line in open(self.filename,"r"):
