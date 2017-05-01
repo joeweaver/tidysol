@@ -5,6 +5,7 @@ import re
 import csv
 import collections
 from decimal import Decimal
+import sys
 
 class ComsolExportFile(object):
     """An exported comsol file reader."""
@@ -105,7 +106,7 @@ class ComsolExportFile(object):
         return(var_descs)
     
     #if outfile is not specified, this returns a string. That is a VERY bad idea if you have  large file.    
-    def to_csv(self,timesToWrite=[],specifiedCols=[],outfile=None):       
+    def to_csv(self,timesToWrite=[],specifiedCols=[],outfile=None,showProgress=25000):       
         metakeys=[]
         metaToWrite=[]
         #default, write all timesteps
@@ -178,7 +179,11 @@ class ComsolExportFile(object):
                                     colsToWrite.append(col)
                     col=col+1        
                 try:
+                    if(showProgress>0):
+                        print('Processed {0} lines per *: '.format(showProgress),end='')
+                        sys.stdout.flush()
                     #TODO this may affect performance. Look into moving this out of for ts loop
+                    lcount=0                    
                     for line in open(self.filename,"r"):
                         matchComment= re.search('^%',line)
                         if not matchComment:
@@ -192,6 +197,11 @@ class ComsolExportFile(object):
                                 outfile.write(",".join(str(c) for c in writeMe)+"\n")
                             else:
                                 output=output+"\n"+",".join(str(c) for c in writeMe)
+                            lcount=lcount+1
+                            if showProgress > 0:
+                                if lcount % showProgress ==0:
+                                    print('*',end='')
+                                    sys.stdout.flush()
 
                 except self.error_to_catch:
                     raise(TidysolException("Could not find file: "+self.filename))
