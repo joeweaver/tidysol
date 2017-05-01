@@ -412,5 +412,29 @@ class TestTidy(TestCase):
                 fwritten.close()
     
     #test for duplicate specified vars
+    def test_multiple_timestep_two_var_repeat_one(self):   
+        #TODO some odd gymnastics to handle test files and temp file writing. There's probably  a better way        
+        fgold = open("tests\\commands\\data\\goldfiles\\two_timestep_two_var.csv")     
+        fdebug= open("tests\\debug-dump.txt","w")
+        fwritten=None
+        savewd = os.getcwd()
+        shutil.copyfile('tests\\commands\\data\\good-two-timestep.txt',self.test_dir+"\\good-two-timestep.txt")
+        os.chdir(self.test_dir)  
+        try:
+            popen(['tidysol', 'tidy', self.test_dir+"\\good-two-timestep.txt",'--cols=spf2.sr,spf2.cellRe,spf2.sr'], stdout=PIPE).communicate()[0].decode("utf-8")
+            fwritten = open(self.test_dir+"\\good-two-timestep.csv") 
+        finally:
+            goldtext=fgold.read()
+            writtentext=fwritten.read()
+            fgold.close()
+            fwritten.close()       
+            os.chdir(savewd)     
+            fdebug.write(writtentext)
+            fdebug.close()
+            self.maxDiff=None
+            self.assertMultiLineEqual(goldtext,writtentext)
+            os.chdir(savewd)     
+            if fwritten is not None:
+                fwritten.close()
                 
     #what about handling a large file?  

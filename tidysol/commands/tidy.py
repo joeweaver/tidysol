@@ -31,6 +31,8 @@ class Tidy(Base):
                 if c.columnVars.get(col) == None and c.metaData.get(col)==None:
                     if not col in c.vars_w_descs():
                         raise TidysolException("Could not find data for variable {0}".format(col))
+            #ensure unique cols
+            writeCols=list(set(writeCols))
             
             base = os.path.basename(self.options["<name>"])
             fname = os.path.splitext(base)[0]
