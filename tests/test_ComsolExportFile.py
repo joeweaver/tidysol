@@ -42,13 +42,13 @@ class TestComsolExportFile(TestCase):
     def test_error_no_expressions_meta(self):
         with self.assertRaises(TidysolException) as context:
             ComsolExportFile('tests\\commands\\data\\bad-no-expressionsmeta.txt')
-        assert('Could not find an % Expressions line' == str(context.exception))
+        assert('Could not find a \"% Expressions:\" line' == str(context.exception))
 
     #sub case of test_error_wrong_number_of_vars if %Dimensions is not given
     def test_error_no_dimensions_meta(self):
         with self.assertRaises(TidysolException) as context:
             ComsolExportFile('tests\\commands\\data\\bad-no-dimensionsmeta.txt')
-        assert('Could not find a % Dimensions line' == str(context.exception))
+        assert('Could not find a \"% Dimension:\" line' == str(context.exception))
         
     #the number of lines which do not begin with % should be the same as the
     #% nodes value in the metadata
@@ -61,7 +61,7 @@ class TestComsolExportFile(TestCase):
     def test_error_no_nodes_meta(self):
         with self.assertRaises(TidysolException) as context:
             ComsolExportFile('tests\\commands\\data\\bad-no-nodesmeta.txt')
-        assert('Could not find a % Nodes line' == str(context.exception))
+        assert('Could not find a \"% Nodes:\" line' == str(context.exception))
         
     #The number of descriptions is the same as number listed in % Expressions
     #descriptions are allowed to be a blank string    
@@ -75,5 +75,5 @@ class TestComsolExportFile(TestCase):
     def test_error_no_description_meta(self):
         with self.assertRaises(TidysolException) as context:
             ComsolExportFile('tests\\commands\\data\\bad-no-descriptionsmeta.txt')
-        assert('Could not find a % Description line' == str(context.exception))
+        assert('Could not find a \"% Description:\" line' == str(context.exception))
     

@@ -64,19 +64,20 @@ class TestSharedErrors(TestCase):
                 assert('Expected 21 variables (3 dimensions and 18 expressions) but found 22 (3 dimensions and 19 expressions)' == output.rstrip())  
 
 
+    #for these 'could not find a FOO tests, I could probably further subtest
     #sub case of test_error_wrong_number_of_vars if %Expressions is not given
     def test_error_no_expressions_meta(self):
         for c in self.commands:
             with self.subTest(c=c):
                 output = popen(['tidysol', c, 'tests\\commands\\data\\bad-no-expressionsmeta.txt'], stdout=PIPE,bufsize=16384).communicate()[0].decode("utf-8")
-                assert('Could not find an % Expressions line' == output.rstrip())
+                assert('Could not find a \"% Expressions:\" line' == output.rstrip())
         
     #sub case of test_error_wrong_number_of_vars if %Dimension is not given
     def test_error_no_dimensions_meta(self):
         for c in self.commands:
             with self.subTest(c=c):
                 output = popen(['tidysol', c, 'tests\\commands\\data\\bad-no-dimensionsmeta.txt'], stdout=PIPE,bufsize=16384).communicate()[0].decode("utf-8")
-                assert('Could not find a % Dimensions line' == output.rstrip())
+                assert('Could not find a \"% Dimension:\" line' == output.rstrip())
                 
     #the number of lines which do not begin with % should be the same as the
     #% nodes value in the metadata
@@ -91,7 +92,7 @@ class TestSharedErrors(TestCase):
         for c in self.commands:
             with self.subTest(c=c):
                 output = popen(['tidysol', c, 'tests\\commands\\data\\bad-no-nodesmeta.txt'], stdout=PIPE,bufsize=16384).communicate()[0].decode("utf-8")
-                assert('Could not find a % Nodes line' == output.rstrip())
+                assert('Could not find a \"% Nodes:\" line' == output.rstrip())
         
     #The number of descriptions is the same as number listed in % Expressions
     #descriptions are allowed to be a blank string    
@@ -107,4 +108,4 @@ class TestSharedErrors(TestCase):
         for c in self.commands:
             with self.subTest(c=c):
                 output = popen(['tidysol', c, 'tests\\commands\\data\\bad-no-descriptionsmeta.txt'], stdout=PIPE,bufsize=16384).communicate()[0].decode("utf-8")
-                assert('Could not find a % Description line' == output.rstrip())
+                assert('Could not find a \"% Description:\" line' == output.rstrip())

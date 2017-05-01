@@ -21,15 +21,13 @@ class ComsolExportFile(object):
             NOT_MATCHED=-1
             linecount = 0
             varsLine=NOT_MATCHED
-            numExpressions=NOT_MATCHED
-            numDimensions=NOT_MATCHED
-            numNodesMeta=NOT_MATCHED
-            numDesc=NOT_MATCHED
             nodeCount=0
             varDescs=[]
             for line in open(self.filename,"r"):
                 linecount=linecount + 1
-                #matchComment= re.search('^%',line)
+                #replaced a regex with just looking for the first char, since we may be doing this 100's of thousands of times
+                #could probably assume that once the comments are done and we're into data, we never need to mach again, but
+                #only if there's pain in time to run
                 matchComment=(line[0]=="%")
                 if matchComment:
                     varReg='([\w|\.]+)\s*(\(*\S*\)*)\s*\@\s*t=(\d\.*\d*)\s*'
@@ -49,42 +47,32 @@ class ComsolExportFile(object):
                             self.metaData[matchMeta.group(1)]=matchMeta.group(2)
                 else:
                     nodeCount=nodeCount+1
-                #TODO this repetivie code can be handled better now that we're matching all meta
-                matchExpressionCount = re.search('^% Expressions:\s+(\d+)',line)
-                if matchExpressionCount:
-                    numExpressions = matchExpressionCount.group(1)
-                matchDimensions=re.search('^% Dimension:\s+(\d+)',line)
-                if matchDimensions:                
-                    numDimensions = matchDimensions.group(1)
-                matchNodesMeta=re.search('^% Nodes:\s+(\d+)',line)
-                if matchNodesMeta:                
-                    numNodesMeta = matchNodesMeta.group(1)
-                matchDescriptions=re.search('^% Description:\s+(.+)',line)
-                if matchDescriptions:
-                    rawDesc=matchDescriptions.group(1)
-                    #have to quote things like 'Velocity, z component'
-                    quotedDesc=re.sub('([^,]*,\s+\S+\s+component[^,]*)', lambda x: "\"{0}\"".format(x.group(1)),rawDesc)
-                    #letting the csv package deal with splitting by only unenclosed commas
-                    descriptions = csv.reader([quotedDesc], delimiter=',') 
-                    for row in descriptions: 
-                        numDesc=len(row)
-                        for r in row:
-                            varDescs.append(re.sub('\s*,\s*',' - ',r.strip()))    
-            if(numExpressions == NOT_MATCHED):
-                raise TidysolException("Could not find an % Expressions line")
-            if(numDimensions == NOT_MATCHED):
-                raise TidysolException("Could not find a % Dimensions line")
-            if(numNodesMeta == NOT_MATCHED):
-                raise TidysolException("Could not find a % Nodes line")  
-            if(numDesc==NOT_MATCHED):
-                raise TidysolException("Could not find a % Description line")
-                
-            if(int(numNodesMeta) != nodeCount):
-                raise TidysolException('Expected {0} nodes but read {1}'.format(numNodesMeta,nodeCount))
+
+  
+            
+            #make sure we've actually found the metadata we expect
+            for md in ['Expressions','Dimension','Nodes','Description']:
+                if not self.metaData.get(md):
+                    raise TidysolException("Could not find a \"% {0}:\" line".format(md))
+
+
+            rawDesc=self.metaData.get('Description')
+            #have to quote things like 'Velocity, z component'
+            quotedDesc=re.sub('([^,]*,\s+\S+\s+component[^,]*)', lambda x: "\"{0}\"".format(x.group(1)),rawDesc)
+            #letting the csv package deal with splitting by only unenclosed commas
+            descriptions = csv.reader([quotedDesc], delimiter=',') 
+            numDescriptions = NOT_MATCHED            
+            for row in descriptions: 
+                numDescriptions=len(row)
+                for r in row:
+                    varDescs.append(re.sub('\s*,\s*',' - ',r.strip()))  
+              
+            if(int(self.metaData['Nodes']) != nodeCount):
+                raise TidysolException('Expected {0} nodes but read {1}'.format(self.metaData['Nodes'],nodeCount))
              
             
             if self.foundVars:
-                expected=int(numExpressions)+int(numDimensions)
+                expected=int(self.metaData['Expressions'])+int(self.metaData['Dimension'])
                 if len(self.foundVars)+len(self.dimVars) == expected:
                     varnum=0
                     #if performance is an issue, we could get more clever about this    
@@ -95,17 +83,17 @@ class ComsolExportFile(object):
 
                        #slightly hacky - there is a varn for each repeated timestep. Once we get to the end of the descriptions, we're looping around, so exit the iteration
                        #there's a few hole in it, but the internal consistency checks should catch them first (famous last words)                    
-                       if varnum<(numDesc):
+                       if varnum<numDescriptions:
                            self.columnVars[varn]="{0}".format(varDescs[varnum])     
                        varnum=varnum+1          
                 else:
-                    raise TidysolException('Expected {0} variables ({1} dimensions and {2} expressions) but found {3} ({4} dimensions and {5} expressions)'.format(expected,numDimensions,numExpressions,len(self.foundVars)+len(self.dimVars),len(self.dimVars),len(self.foundVars)))               
+                    raise TidysolException('Expected {0} variables ({1} dimensions and {2} expressions) but found {3} ({4} dimensions and {5} expressions)'.format(expected,self.metaData['Dimension'],self.metaData['Expressions'],len(self.foundVars)+len(self.dimVars),len(self.dimVars),len(self.foundVars)))               
             else:
                 raise TidysolException("Could not find a line defining variables") 
                 
-            expectedDesc=int(numExpressions)/len(self.timesteps)
-            if(expectedDesc!=numDesc):
-                raise TidysolException('Expected {0} descriptions of variables but read {1}'.format(int(expectedDesc),numDesc))
+            expectedDesc=int(self.metaData['Expressions'])/len(self.timesteps)
+            if(expectedDesc!=numDescriptions):
+                raise TidysolException('Expected {0} descriptions of variables but read {1}'.format(int(expectedDesc),numDescriptions))
        
         except self.error_to_catch:
             raise(TidysolException("Could not find file: "+self.filename))
