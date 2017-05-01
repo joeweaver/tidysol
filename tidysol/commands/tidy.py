@@ -8,7 +8,6 @@ import os
 
 class Tidy(Base):
     """Create a tidy version of the data in the Comsol export"""
-    
     def run(self):
         try:
             c=ComsolExportFile(self.options["<name>"])       

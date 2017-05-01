@@ -31,8 +31,24 @@ If you're very interested in tidy data, the open access journal article* describ
 
 Limitations:
 Only test on output from COMSOL 4.3a. Further, I only use these options for export:
---TODO list options here.  If you use a different version or export options, use at your own risk.
+--If you use a different version or export options, use at your own risk.
+-Points to evaluate in: Taken from Data Set
+Data format: spreadsheet
+Transpose: NOT checked
+Space dimension: take from data set
+Geometry level: Take from data set
+Advanced
+Include header: CHECKED
+Full precision: CHECKED
+Sort: NOT checked
+Evaluate in: Gauss points
+Gauss Point Order: 1
+Smoothing: None
 
+This is not a fast exporter. It has not be optimized and doesn't take guesses. For example, it does not
+assum that there will be no more commented lines in the export file (those beginning with %) after it starts reading
+them.  This is by intention, although it means this is not a fast reader, it is a slow reader, it is at least not a half-fast reader.
+Save as txt. 
 Acknowledgements:
 This cli was fleshed out from the skeleton CLI framework provided by https://github.com/rdegges/skele-cli
 Also, thanks to countless commenters on random google searches and stackoverflow
@@ -44,13 +60,12 @@ from inspect import getmembers, isclass
 
 from docopt import docopt
 
-from . import __version__ as VERSION
+
 import re
 
 def main():
     """Main CLI entrypoint."""
     import tidysol.commands
-    options = docopt(__doc__, version=VERSION)
 
     # Here we'll try to dynamically match the command the user is trying to run
     # with a pre-defined command class we've already created.
@@ -64,3 +79,10 @@ def main():
                         command=command[1]
                         command=command(options)
                         command.run()
+
+if __name__ == "__main__":
+    options = docopt(__doc__)
+    main()
+else:
+    from . import __version__ as VERSION
+    options = docopt(__doc__, version=VERSION)

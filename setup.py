@@ -31,7 +31,6 @@ class RunTests(Command):
         errno = call(['pytest', '--cov=tidysol', '--cov-report=term-missing','--profile','--profile-svg'])
         raise SystemExit(errno)
 
-
 setup(
     name = 'tidysol',
     version = __version__,

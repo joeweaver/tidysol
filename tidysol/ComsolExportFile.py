@@ -29,7 +29,8 @@ class ComsolExportFile(object):
             varDescs=[]
             for line in open(self.filename,"r"):
                 linecount=linecount + 1
-                matchComment= re.search('^%',line)
+                #matchComment= re.search('^%',line)
+                matchComment=(line[0]=="%")
                 if matchComment:
                     varReg='([\w|\.]+)\s*(\(*\S*\)*)\s*\@\s*t=(\d\.*\d*)\s*'
                     matchVar = re.findall(varReg,line) #using findall for easy len
@@ -187,6 +188,7 @@ class ComsolExportFile(object):
                                     colsToWrite.append(col)
                     col=col+1        
                 try:
+                    #TODO this may affect performance. Look into moving this out of for ts loop
                     for line in open(self.filename,"r"):
                         matchComment= re.search('^%',line)
                         if not matchComment:
