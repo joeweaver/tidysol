@@ -5,6 +5,7 @@ from .. import ComsolExportFile
 from ..Exceptions import TidysolException
 import re
 import os
+from decimal import Decimal
 
 class Tidy(Base):
     """Create a tidy version of the data in the Comsol export"""
@@ -20,7 +21,7 @@ class Tidy(Base):
                 if t.casefold()!="last".casefold():                   
                     if (not re.match('^\d*\.?\d$',t)):
                            raise (TidysolException("{0} is not a valid timestep".format(t))) 
-                    if float(t) not in c.timesteps:
+                    if Decimal(t) not in [Decimal(ts) for ts in c.timesteps]:
                         raise TidysolException("Could not find data for time {0}".format(t))
             
             if(self.options["--cols"]):
@@ -44,7 +45,8 @@ class Tidy(Base):
                     os.makedirs(os.path.dirname(outfilename), exist_ok=True)
                 o=open(outfilename,"w")
             try:
-                o.write(c.to_csv(writeTimes,writeCols))
+                #o.write(c.to_csv(writeTimes,writeCols))
+                c.to_csv(writeTimes,writeCols,o)
             finally:
                 o.close()
         #not much to do with unexpected exceptions other than print them out

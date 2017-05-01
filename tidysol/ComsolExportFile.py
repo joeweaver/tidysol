@@ -4,6 +4,7 @@ from tidysol.Exceptions import TidysolException
 import re
 import csv
 import collections
+from decimal import Decimal
 
 class ComsolExportFile(object):
     """An exported comsol file reader."""
@@ -79,7 +80,7 @@ class ComsolExportFile(object):
                     for d in self.dimVars:
                         self.columnVars[d]=""
                     for (varn,units,timestep) in self.foundVars:
-                       self.timesteps.add(float(timestep))
+                       self.timesteps.add(timestep)
 
                        #slightly hacky - there is a varn for each repeated timestep. Once we get to the end of the descriptions, we're looping around, so exit the iteration
                        #there's a few hole in it, but the internal consistency checks should catch them first (famous last words)                    
@@ -102,8 +103,9 @@ class ComsolExportFile(object):
         for v in self.columnVars:
             var_descs.append("{0} [{1}]".format(v,self.columnVars[v]))
         return(var_descs)
-        
-    def to_csv(self,timesToWrite=[],specifiedCols=[]):       
+    
+    #if outfile is not specified, this returns a string. That is a VERY bad idea if you have  large file.    
+    def to_csv(self,timesToWrite=[],specifiedCols=[],outfile=None):       
         metakeys=[]
         metaToWrite=[]
         #default, write all timesteps
@@ -112,12 +114,10 @@ class ComsolExportFile(object):
         else:
             for i in range(0,len(timesToWrite)):
                 if timesToWrite[i].casefold()=="last".casefold():
-                    timesToWrite[i]=max(self.timesteps)
-  
+                    timesToWrite[i]=max([Decimal(t) for t in self.timesteps])
         #enforce unique
         timesToWrite=list(set(timesToWrite))  
-        #if(len(timesToWrite)==1) and (timesToWrite[0].casefold()=="last".casefold()):
-        #    timesToWrite[0]=max(self.timesteps)
+
 
         for m in sorted(self.metaData.keys()):
             #by default, do not include metadata now made redundant. Particularly the variable description list
@@ -130,7 +130,7 @@ class ComsolExportFile(object):
                     metakeys.append("{0} []".format(m))
                     metaToWrite.append(re.sub('\s*,\s*',' - ',self.metaData[m])) 
 
-        headerline=""        
+        headerline=""   
         if not specifiedCols:        
             headers=["t []"]+self.vars_w_descs()+metakeys
             headerline=",".join(str(h) for h in headers)
@@ -146,24 +146,26 @@ class ComsolExportFile(object):
                         scname=scmatch.group(1)
                         scdesc=scmatch.group(3)
                         matchDesc = (not scdesc) or (not vdesc) or (scdesc.strip() == vdesc.strip())
-                        matchName=vname.strip()==scname.strip()
+                        matchName=vname.strip()==scname.strip()               
                         if matchName and matchDesc:
                             headers.append(v)
             headers=headers+metakeys
             headerline=",".join(str(h) for h in headers)  
         output=headerline
-
-        for ts in self.timesteps:
+        if outfile:
+            outfile.write(output+'\n')
+        for ts in sorted([Decimal(t) for t in self.timesteps]):
             #could probably get clever with itertools here
             colsToWrite=[]
             for c in range(0,len(self.dimVars)):
                 colsToWrite.append(c+1)
             col=len(self.dimVars)+1
-            #having string/float issues all over depending on how stuff
-            #arrives here. Arbitralily casting evering to float at this chokepoint
-            if(float(ts) in [float(i) for i in timesToWrite]):
-                for (varn,units,timestep) in self.foundVars:                    
-                    if(str(ts) == str(timestep)):
+            if(ts in sorted([Decimal(i) for i in timesToWrite])):
+                for (varn,units,timestep) in self.foundVars:    
+                    #at this point I give up on str and float casting
+                    #since I don't know the precision other people willl be using for their timesteps and because I don't want them to have to specifiy it
+                    #giving up and using Decimal
+                    if(Decimal(ts) == Decimal(timestep)):
                         if(not specifiedCols):
                             colsToWrite.append(col)
                         else:                     
@@ -185,7 +187,12 @@ class ComsolExportFile(object):
                             for i in colsToWrite:
                                 writeMe.append(cols[i-1])
                             writeMe=writeMe+metaToWrite
-                            output=output+"\n"+",".join(str(c) for c in writeMe)
+                            #about 1/4 of the time is psent in I/O. could make a max-lines and only write when we hit that
+                            if outfile:
+                                outfile.write(",".join(str(c) for c in writeMe)+"\n")
+                            else:
+                                output=output+"\n"+",".join(str(c) for c in writeMe)
+
                 except self.error_to_catch:
                     raise(TidysolException("Could not find file: "+self.filename))
         return (output+"\n")

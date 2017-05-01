@@ -6,3 +6,6 @@ dist
 prof
 tests/debug-dump.txt
 temp
+*.csv
+*.prof
+newdir
