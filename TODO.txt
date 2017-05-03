@@ -1,0 +1,2 @@
+don't clobber existing files - notably csv sources
+tidy should handle t, x, y, z etc passed in from vars output
