@@ -9,3 +9,4 @@ temp
 *.csv
 *.prof
 newdir
+"reference not from skele-cli"
