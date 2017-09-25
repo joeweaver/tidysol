@@ -59,8 +59,16 @@ class ComsolExportFile(object):
 
 
             rawDesc=self.metaData.get('Description')
-            #have to quote things like 'Velocity, z component'
-            quotedDesc=re.sub('([^,]*,\s+\S+\s+component[^,]*)', lambda x: "\"{0}\"".format(x.group(1)),rawDesc)
+            #have to quote things like 'Velocity, z component' and 'Velocity field, liquid phase, x component'
+            #also 'Velocity magnitude, liquid phase'
+            #doing this in three steps, first translating ', XXX phase , X component' clause to ' - XXX phase - X component
+            #then handling as I did before this issue cropped up
+            #finally, handling the case of 'Velocity magnitude, liquid phase'
+            #I'm translating ',' to '-' in the first step to make the second regex easier
+            #I'm not translating the ',' to '- 'in the next steps so that downstream code can expect the same output as before
+            quotedDesc=re.sub('\s([^,]*,\s+\w+\s+phase, \w+ component)', lambda x: re.sub(',',' -',x.group(1)),rawDesc)
+            quotedDesc=re.sub('([^,]*,\s+\S+\s+component*)', lambda x: "\"{0}\"".format(x.group(1)),quotedDesc)
+            quotedDesc=re.sub('\s([^,]*,\s+\w+\s+phase)', lambda x: re.sub(',',' -',x.group(1)),quotedDesc)
             #letting the csv package deal with splitting by only unenclosed commas
             descriptions = csv.reader([quotedDesc], delimiter=',') 
             numDescriptions = NOT_MATCHED            

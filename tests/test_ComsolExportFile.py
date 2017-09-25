@@ -70,10 +70,17 @@ class TestComsolExportFile(TestCase):
         with self.assertRaises(TidysolException) as context:
             ComsolExportFile('tests\\commands\\data\\bad-wrong-num-descriptions.txt')
         assert('Expected 19 descriptions of variables but read 21' == str(context.exception))
+
+    #it gets even worse when you go to multiphase, added this case to handle things like ' Velocity field, liquid phase, x component,' and 'Velocity magnitude, liquid phase,'
+    def test_multiple_uncescaped_commas_descriptions(self):
+        cef=ComsolExportFile('tests\\commands\\data\\good-mulitple-unesecaped-commas.txt')
+        assert(28 == len(cef.columnVars))
         
     #sub case of test_error_wrong_num_descriptions if % descriptions not given    
     def test_error_no_description_meta(self):
         with self.assertRaises(TidysolException) as context:
             ComsolExportFile('tests\\commands\\data\\bad-no-descriptionsmeta.txt')
         assert('Could not find a \"% Description:\" line' == str(context.exception))
+        
+
     
