@@ -66,9 +66,10 @@ class ComsolExportFile(object):
             #finally, handling the case of 'Velocity magnitude, liquid phase'
             #I'm translating ',' to '-' in the first step to make the second regex easier
             #I'm not translating the ',' to '- 'in the next steps so that downstream code can expect the same output as before
-            quotedDesc=re.sub('\s([^,]*,\s+\w+\s+phase, \w+ component)', lambda x: re.sub(',',' -',x.group(1)),rawDesc)
+            quotedDesc=re.sub('[^,]*,\s*(phase|mixture)', lambda x: re.sub(',',' -',x.group(0)),rawDesc)
+            quotedDesc=re.sub('\s?([^,]*,\s+\w+\s+(phase|mixture), \w+ component)', lambda x: re.sub(',',' -',x.group(1)),quotedDesc)
             quotedDesc=re.sub('([^,]*,\s+\S+\s+component*)', lambda x: "\"{0}\"".format(x.group(1)),quotedDesc)
-            quotedDesc=re.sub('\s([^,]*,\s+\w+\s+phase)', lambda x: re.sub(',',' -',x.group(1)),quotedDesc)
+            quotedDesc=re.sub('\s*([^,]*,\s*\w+\s*(phase|mixture))', lambda x: re.sub(',',' -',x.group(1)),quotedDesc)
             #letting the csv package deal with splitting by only unenclosed commas
             descriptions = csv.reader([quotedDesc], delimiter=',') 
             numDescriptions = NOT_MATCHED            

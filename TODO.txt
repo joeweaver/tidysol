@@ -1,2 +1,6 @@
 don't clobber existing files - notably csv sources
 tidy should handle t, x, y, z etc passed in from vars output
+non-transient solutions
+quicker run time for getting metadata/vars
+handle case where a column is given with whitespace around it (example, add a line after line 28 in tidy.py col=col.strip())
+    need to add test case, maybe better spot for the logic

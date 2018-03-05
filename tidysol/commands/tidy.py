@@ -28,8 +28,10 @@ class Tidy(Base):
                 writeCols=re.split(",",re.sub('\"','',self.options["--cols"][0]))
 
             for col in writeCols:
+                col=col.strip()
                 if c.columnVars.get(col) == None and c.metaData.get(col)==None:
                     if not col in c.vars_w_descs():
+                        #print(c.vars_w_descs())
                         raise TidysolException("Could not find data for variable {0}".format(col))
             #ensure unique cols
             writeCols=list(set(writeCols))

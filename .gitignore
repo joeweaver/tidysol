@@ -8,5 +8,7 @@ tests/debug-dump.txt
 temp
 *.csv
 *.prof
+*.pyc
+__pycache__
 newdir
 "reference not from skele-cli"
