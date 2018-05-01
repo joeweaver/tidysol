@@ -42,6 +42,9 @@ Options
      --time=<time>  Include data only from the specified time step(s)
      --col=<variable>  Include data only for the given variable(s). Variables from
 
+Caveats
+-------
+This was written to deal with pain points for my specific CFD projects. I *expect* it torun ok on most transient models using using mixture models and plain old turbulent/laminar flow pysics.  If you run into issues, let me know and I'd be happy to figure out what's going on.
 
 .. _tidy: http://r4ds.had.co.nz/tidy-data.html
 .. [#] Wickham, H. (2014). Tidy data. Journal of Statistical Software, 59(10), 1-23.
