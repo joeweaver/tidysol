@@ -1,5 +1,3 @@
-https://zenodo.org/badge/DOI/10.5281/zenodo.1243249.svg
-
 tidysol
 =========
 
